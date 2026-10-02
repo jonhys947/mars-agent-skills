@@ -4,9 +4,28 @@ Personal mirror of the Agent Skills used across MARS projects.
 
 This repository is intentionally organized with each skill under `skills/<name>/SKILL.md`, so compatible skill installers can discover the catalog directly.
 
+## Sync the exact locally installed copies
+
+The repository includes `scripts/sync-local-skills.ps1`, which copies the installed skills from:
+
+- `~/.agents/skills`
+- `~/.codex/skills`
+
+It excludes Codex built-in `.system` skills and standalone `.vibeskills` installer state, normalizes lowercase `skill.md` to `SKILL.md`, rebuilds `SKILLS.txt`, commits the result, and pushes it to `main`.
+
+Run from Windows PowerShell:
+
+```powershell
+$tmp = "$env:TEMP\sync-mars-agent-skills.ps1"
+Invoke-WebRequest "https://raw.githubusercontent.com/jonhys947/mars-agent-skills/main/scripts/sync-local-skills.ps1" -OutFile $tmp
+powershell -ExecutionPolicy Bypass -File $tmp
+```
+
+This is the canonical way to refresh the cloud mirror from the locally installed copies.
+
 ## Install
 
-Install every skill globally:
+After the first local sync has populated `skills/`, install every skill globally:
 
 ```powershell
 npx skills add https://github.com/jonhys947/mars-agent-skills --all -g -y
@@ -73,8 +92,8 @@ The repository also mirrors the other skills present in the local global catalog
 
 - Files are copied from the locally installed skill directories supplied by the repository owner.
 - Codex built-in `.system` skills are intentionally **not mirrored**. They are runtime-provided system assets rather than user-installed skills.
-- Local installer metadata such as `.vibeskills` lock files is not mirrored as a standalone skill.
-- `http-error-diagnostics/skill.md` was normalized to `SKILL.md` for case-sensitive environments.
+- Standalone `.vibeskills` installer state is not treated as a skill.
+- `http-error-diagnostics/skill.md` is normalized to `SKILL.md` for case-sensitive environments.
 - Third-party skills remain the work of their upstream authors and remain subject to their upstream licenses and terms. This repository does not relicense third-party content. See [`SOURCES.md`](SOURCES.md).
 
 ## Project usage
