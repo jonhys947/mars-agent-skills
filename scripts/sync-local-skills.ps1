@@ -13,6 +13,28 @@ Write-Host "Cloning $Repository ..."
 git clone --branch $Branch $Repository $work
 if ($LASTEXITCODE -ne 0) { throw "git clone failed" }
 
+# Keep the sync self-contained. If this Windows Git installation has no
+# author identity configured, reuse the author identity already present in
+# the repository history instead of requiring a global Git configuration.
+$gitName = git -C $work config --get user.name 2>$null
+$gitEmail = git -C $work config --get user.email 2>$null
+
+if ([string]::IsNullOrWhiteSpace($gitName)) {
+    $gitName = git -C $work log -1 --format=%an
+    if ([string]::IsNullOrWhiteSpace($gitName)) {
+        throw "Unable to determine Git author name from local config or repository history."
+    }
+    git -C $work config user.name $gitName
+}
+
+if ([string]::IsNullOrWhiteSpace($gitEmail)) {
+    $gitEmail = git -C $work log -1 --format=%ae
+    if ([string]::IsNullOrWhiteSpace($gitEmail)) {
+        throw "Unable to determine Git author email from local config or repository history."
+    }
+    git -C $work config user.email $gitEmail
+}
+
 $dest = Join-Path $work "skills"
 if (Test-Path $dest) {
     Remove-Item $dest -Recurse -Force
