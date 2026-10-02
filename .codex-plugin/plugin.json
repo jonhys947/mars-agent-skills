@@ -2,5 +2,30 @@
   "name": "mars-agent-skills",
   "version": "1.0.0",
   "description": "Reusable MARS engineering, embedded, review, documentation and UI skills for ChatGPT Work agents.",
-  "skills": "./skills/"
+  "author": {
+    "name": "MARS"
+  },
+  "repository": "https://github.com/jonhys947/mars-agent-skills",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "MARS Agent Skills",
+    "shortDescription": "MARS engineering skills",
+    "longDescription": "Reusable engineering skills for ChatGPT Work agents, covering embedded systems, ESP32 and CH32 development, code review, testing, technical documentation, prompt design, UI and iconography workflows. The package contains skills only and does not add MCP servers or cloud Codex execution.",
+    "developerName": "MARS",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Embedded engineering",
+      "Code review",
+      "Testing guidance",
+      "Technical documentation",
+      "UI and icon design",
+      "Prompt and workflow design"
+    ],
+    "websiteURL": "https://github.com/jonhys947/mars-agent-skills",
+    "defaultPrompt": [
+      "Review this embedded-system design using the relevant MARS skills.",
+      "Use the appropriate MARS skills to review this technical document.",
+      "Use the MARS UI skills to review this interface and icon system."
+    ]
+  }
 }
