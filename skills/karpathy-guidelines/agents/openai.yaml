@@ -1,0 +1,14 @@
+interface:
+  display_name: karpathy guidelines
+  short_description: Behavioral guidelines to reduce common LLM coding mistakes. Use
+    when writing, reviewing, or refactoring code to avoid overcomplication, make surgical
+    changes, surface assumptions, and define verifiable success criteria.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

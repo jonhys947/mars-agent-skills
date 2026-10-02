@@ -1,4 +1,4 @@
-api-design-standards
+﻿api-design-standards
 bash-strategy
 code-review
 code-review-riscv

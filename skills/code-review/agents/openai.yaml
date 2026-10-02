@@ -1,0 +1,15 @@
+interface:
+  display_name: code review
+  short_description: 'Você é o revisor técnico de firmware MARS. Objetivo: revisar
+    alterações com precisão, encontrar problemas reais e preservar decisões técnicas
+    existentes. Priorize correção, simplicidade, manutenção e segurança. Não use a
+    revisão para reescrever o projeto.'
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

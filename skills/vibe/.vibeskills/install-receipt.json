@@ -1,0 +1,1123 @@
+{
+  "files": [
+    {
+      "path": "SKILL.md",
+      "sha256": "28bac36dc0293302e89489c521c65c3d7ea883ba5361e9bc1a2c28df4f5691c1"
+    },
+    {
+      "path": "apps/vgo-cli/pyproject.toml",
+      "sha256": "123ba260b40845df60e766f64616d45273786dc9e23f2b05fb9db6b7c234efae"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/__init__.py",
+      "sha256": "7e4f7d949e718c0a9f58ebfb0f4f1116e50603b430b340f41e489a5e2a7297a1"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/commands.py",
+      "sha256": "0b3de0096b5c7ce8e5e4a00f17447ac30cf9e3d009945466e700e4017070135f"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/core_bridge.py",
+      "sha256": "e0d71f6d670b30f0883d7abdbbf6a8d208d4e3d4812ea70cf61105528bc37519"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/errors.py",
+      "sha256": "86012e2038ede1a0d9083d1d0f51a41ddb2c4c2a6d37a2cc4198f30faf92ef26"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/external.py",
+      "sha256": "84c60be57bdd458e05b6a17cd62de2978750ae8ee1ea6bb7b9816bf837044811"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/hosts.py",
+      "sha256": "1523ccc605c24d7d66da1c09bb500eaee231e11ca70981f9cf4d8f79139bad0e"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/main.py",
+      "sha256": "335d8b830f83ae77b2bb2319c11207f95b608f7b008a4de8660d5b671a49e4e1"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/output.py",
+      "sha256": "7f27e34b91a3529887752668e7c9028ced543125395303af26f108da959ac341"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/process.py",
+      "sha256": "4d0d74fbe9e4189596945dcd5258a41b12aa26da9fd969474c431a9d082fb1c0"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/repo.py",
+      "sha256": "59106b7d28c22dc1ceb9b63a5d2d4d8ae883825d3eef43a14e63075e9b0c2255"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/skill_surface.py",
+      "sha256": "3d6cc09fc4775362c8c6ef165845fb2d407843d3c8d577f5e0f13eaa35226745"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/upgrade_state.py",
+      "sha256": "cae0fe46c42f4aa826af2ec4905a71765e27ff367b1b75917bc14a1492453a6f"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/version_reminder.py",
+      "sha256": "7c607f7aefe66ff531859891a855be2fd2a3f1bec8a571c5f1f596927eaccf34"
+    },
+    {
+      "path": "apps/vgo-cli/src/vgo_cli/workspace.py",
+      "sha256": "3d706ad993eeccd80638d26d0655af9f84610ec2313c9b04211af530520eff6a"
+    },
+    {
+      "path": "config/adapter-registry.json",
+      "sha256": "ad57cf0187730bebcf6aea409649b8b29f930a5b6ae2bc8a295c884434d07516"
+    },
+    {
+      "path": "config/agency-overlays.json",
+      "sha256": "5c10bbdbe1aa4eda94db0481d3d591cf6e98f5828b5c413264f05b3238886816"
+    },
+    {
+      "path": "config/ai-rerank-policy.json",
+      "sha256": "140443fbfe9126263cda47bf93cc9abe36291820aafbf3b5ddee922ee3d7f2c0"
+    },
+    {
+      "path": "config/capability-catalog.json",
+      "sha256": "6995aa667f13a71f2eeb500cbaade7a7d1d797050098c6b2c4cb18bc95a9ab15"
+    },
+    {
+      "path": "config/closure-overlay.json",
+      "sha256": "4d00b94303db7a6c2537013b60be79ef4d8871df5e3561b8746c6e1032f8341c"
+    },
+    {
+      "path": "config/connector-admission-policy.json",
+      "sha256": "6254e886d389dd8cb8de0ffc235683d985953e8bc7f5a3a3a018277d05569978"
+    },
+    {
+      "path": "config/connector-provider-policy.json",
+      "sha256": "ad867112ce2d5cda550442a64ffb0d0f0ce2fa373033eda18a4fb21e7782e434"
+    },
+    {
+      "path": "config/connector-sandbox-policy.json",
+      "sha256": "3ede882097e58f423a1222cfc26c7da2403c504f9a961b0477ec807cd7e25b17"
+    },
+    {
+      "path": "config/cuda-kernel-overlay.json",
+      "sha256": "c6fadc06c0cd5950ee124d8ef0df72dd339c7152e2f42f337162e92d42e0e11a"
+    },
+    {
+      "path": "config/daily-dialectic-guard.json",
+      "sha256": "4c75fe588e345433a7f9f31064871439ec3abc25887a7610aa76c1f1779dc24e"
+    },
+    {
+      "path": "config/data-scale-overlay.json",
+      "sha256": "ea9551d9e2c2974bf273a126a2a0f9102c9e6c5f5cdb092baeca01c50bc9b573"
+    },
+    {
+      "path": "config/deep-discovery-policy.json",
+      "sha256": "1e16edb2aadc11afdf7dc93bd6a6567e9299fb10d0e8a5e73ca528795a22cf92"
+    },
+    {
+      "path": "config/dialectic-team-policy.json",
+      "sha256": "50b9cf0935dfa929b01eeb93e3575295f087049ef79bdbe9616495fd82abcb4e"
+    },
+    {
+      "path": "config/docling-provider-policy.json",
+      "sha256": "c6185a26473ba683a111d21e907bd3b08cd6c4bbb8415167d1a87c21abca20bd"
+    },
+    {
+      "path": "config/exploration-domain-map.json",
+      "sha256": "819d0993fdef4a886649582d52bad7bf6a6a332003dce8e68d41178acf50d444"
+    },
+    {
+      "path": "config/exploration-intent-profiles.json",
+      "sha256": "9f95ce481f7124c593b2d4e6d99a101abe1ff9c72220bcb08d66cd13b1af35a6"
+    },
+    {
+      "path": "config/exploration-policy.json",
+      "sha256": "870eea25b7cdeeaa9a1741ec8d7e22072734b08cea4f213ad18b406a8fa31df8"
+    },
+    {
+      "path": "config/fallback-governance.json",
+      "sha256": "674f852e9e59be8558a15d38a1b3ce6bf74d417afbf616be00b7c683218ccc67"
+    },
+    {
+      "path": "config/forbidden-mcp-policy.json",
+      "sha256": "51346b0542030469baa879f12319ed6e3e7eda9b336dc470441a8c14585630be"
+    },
+    {
+      "path": "config/framework-interop-overlay.json",
+      "sha256": "6a2b00664e965e695f5c0f195d96d35911be2ef490190a24f02bb44d16792ab7"
+    },
+    {
+      "path": "config/gsd-overlay.json",
+      "sha256": "3286a2eaf53262b7559a70cc3145ef4e8d290b7bfc6dc85bf1017aa506ca014c"
+    },
+    {
+      "path": "config/heartbeat-policy.json",
+      "sha256": "2b45cfb18df805ce31823ecefa3de9df6df264b9c3dcf586a315cca49608552f"
+    },
+    {
+      "path": "config/implementation-guardrails.json",
+      "sha256": "e89f10ecb956a236638dba873138edd566fae9aab4363771eee248f470c2e315"
+    },
+    {
+      "path": "config/live-document-contract.json",
+      "sha256": "63359ec40df100cf0faa2603d17ac065e98451e454365aa29da962b81df6b27b"
+    },
+    {
+      "path": "config/llm-acceleration-policy.json",
+      "sha256": "6f85ea5a789db74116c8340ac4680d3c853cfc3427c727ad7534b671a79bddbb"
+    },
+    {
+      "path": "config/memory-backend-adapters.json",
+      "sha256": "060f58da2b286cec999eee18a5d25d70030189d2ec1e41d4836681cf87090bfa"
+    },
+    {
+      "path": "config/memory-disclosure-policy.json",
+      "sha256": "15d7a6f3df2558ca4f1a5e718b4926cefd4d252ab0cc0e396f603f10d60be993"
+    },
+    {
+      "path": "config/memory-governance.json",
+      "sha256": "b05b43f927c6fc97249d309f55632f5c03f84cfb81ed9b36a958fd8711f50597"
+    },
+    {
+      "path": "config/memory-ingest-policy.json",
+      "sha256": "37ee839fb1f6af7ff09dc56a9e919d0beaaa3414dc05cd93ca55731ab54e1ea4"
+    },
+    {
+      "path": "config/memory-retrieval-budget-policy.json",
+      "sha256": "f4b55c7d3ee5f75d38f4133ae7efa699cc07019318f900c3c920a3f177cb876a"
+    },
+    {
+      "path": "config/memory-runtime-v3-policy.json",
+      "sha256": "7dcafbbb55fb6405b2032d2ce05105781c082ab60c3505b0d22a059c81fdb8d7"
+    },
+    {
+      "path": "config/memory-stage-activation-policy.json",
+      "sha256": "7bdf96697723cc2d2dbda53f4bf270be31beeaa5abba4dc56145499cd0cd0fd7"
+    },
+    {
+      "path": "config/memory-tier-router.json",
+      "sha256": "358d815a903185699208f4d31121629ac9fc7baabd450521db329518360f8570"
+    },
+    {
+      "path": "config/ml-lifecycle-overlay.json",
+      "sha256": "ce48c51756527e46e4bbb3d9c5c7a9e8bbe1478e4280b3c51ca7a36f1df94230"
+    },
+    {
+      "path": "config/observability-policy.json",
+      "sha256": "25ef1e3a890057e1759b3968cee0044e743ccac9d69251774ebed8513eda15b5"
+    },
+    {
+      "path": "config/opencode/agents/vibe-implement.md",
+      "sha256": "79587490eab14f573cc1b071916ed2b7b2fa175a39cb82e32cc437113fb4b790"
+    },
+    {
+      "path": "config/opencode/agents/vibe-plan.md",
+      "sha256": "a57a4133662cc3437f208f96f31e14385556bdea776daf6367dd14f112e76b8b"
+    },
+    {
+      "path": "config/opencode/agents/vibe-review.md",
+      "sha256": "47fa14ddb9ecacd429e75511ed99791e4fb8a2fb711f7ea54d5eb16de34267d8"
+    },
+    {
+      "path": "config/opencode/commands/vibe-implement.md",
+      "sha256": "e002438bbd407e6bc1a45a88a26ffdffecfb949dd0c530c27302af0d794ddcc9"
+    },
+    {
+      "path": "config/opencode/commands/vibe-review.md",
+      "sha256": "4f6df88dc91a32934a89e289ab447850e2bfafb9dc27ed4e2e235fa7a7f16ece"
+    },
+    {
+      "path": "config/opencode/commands/vibe.md",
+      "sha256": "f4f8506a1d1563b2290cca2ba45d71b50d8a972ebba56172ff8871e2dc9c47c3"
+    },
+    {
+      "path": "config/opencode/opencode.json.example",
+      "sha256": "228714cce2117a171b0099f7b1b5c89a2a92f8eeab233481621ad59fb44c0f7d"
+    },
+    {
+      "path": "config/openspec-policy.json",
+      "sha256": "28d67e2551e7b2c14f12b1b7ada702d6fd041ab7d7ff6f6e1dab230136994f4b"
+    },
+    {
+      "path": "config/operator-preview-contract.json",
+      "sha256": "526abc7697d89f636138ae5cfd1ecb16e081edd78f93951803e6f8f4be31a72f"
+    },
+    {
+      "path": "config/phase-cleanup-policy.json",
+      "sha256": "1ae24f86bcbff994f7d808a9ccec9503b541cdc917802da1d1051d4ccad144ed"
+    },
+    {
+      "path": "config/plan-execution-policy.json",
+      "sha256": "d3295c590417b6bd87001a7f482b17f0591c808b5487954177d6b1a6e7835a1b"
+    },
+    {
+      "path": "config/plugins-manifest.codex.json",
+      "sha256": "4dcd0a79e66c82c05e282f6a9e20f83ba828e7e2bf96dbdf04c229647fa242af"
+    },
+    {
+      "path": "config/powershell-host-policy.json",
+      "sha256": "d91d6b267a0584c95582adbdb92b0e0a7d6a8468315552ec1da22f0255a0c446"
+    },
+    {
+      "path": "config/project-delivery-acceptance-contract.json",
+      "sha256": "298e8ef602161357cdde42592e6b63d0501b585734e8ad469d526017d1d96bc4"
+    },
+    {
+      "path": "config/prompt-asset-boost.json",
+      "sha256": "7a168e7edb307b7a0928a49d21d103f9e100cd059be0dd4e023725a430c154d4"
+    },
+    {
+      "path": "config/prompt-overlay.json",
+      "sha256": "d79a507ce568917391f345c787249cbeec833aff93b2221a0324fb0ffccf6218"
+    },
+    {
+      "path": "config/proof-class-registry.json",
+      "sha256": "e149d2032d1bd865c7340a14ade58159aac5ac2e126dc1d1ba1d7504e872b0b8"
+    },
+    {
+      "path": "config/python-clean-code-overlay.json",
+      "sha256": "bdb5e5193100b3ae8c946fce2a74462a2000b314b730d108952c86331e559c95"
+    },
+    {
+      "path": "config/quality-debt-overlay.json",
+      "sha256": "35c5041fd28139b6a610f505f608b8a836b14c210cf46ecbdffdd32a219ce2f2"
+    },
+    {
+      "path": "config/requirement-doc-policy.json",
+      "sha256": "01f32e9fcf73af6af9507ae99def0bf2ade6ed22b94724b87be4f39931cb3c11"
+    },
+    {
+      "path": "config/retrieval-intent-profiles.json",
+      "sha256": "9add6ed8f784736a209996d2c392a85403d8c1162c2272db3f1654b717a7a4e4"
+    },
+    {
+      "path": "config/retrieval-policy.json",
+      "sha256": "454a7f3929be5e76bdcc71a96c86080eb3b2f3df7ff90f84a82bd0db563aa9aa"
+    },
+    {
+      "path": "config/retrieval-rerank-weights.json",
+      "sha256": "51a6403ddab35787f1976c61c49de4394f57177942358b78895a27a84b3411df"
+    },
+    {
+      "path": "config/retrieval-source-registry.json",
+      "sha256": "24b32dcbdd884627bf9384e12afd301ebc7d5c9ee9d403cf8f0fbb4c395cf3bf"
+    },
+    {
+      "path": "config/router-model-governance.json",
+      "sha256": "082d8887537abcea8ac6a9f0fbcfe354e72112a17b37cc2bc89c353c83d429ba"
+    },
+    {
+      "path": "config/router-provider-defaults.json",
+      "sha256": "6c72c86f3ecacb34329bae0927d5bab5d63d36e641842dcf3d9161574ed55591"
+    },
+    {
+      "path": "config/router-provider-registry.json",
+      "sha256": "1f52afe43f7695feb15e9178deeaf8d1062679f3d34419bc482c1743c537c719"
+    },
+    {
+      "path": "config/router-thresholds.json",
+      "sha256": "5464fc67512ddae6faca4ef59b2cc3eec78642f84342d8c6493278fae13750c9"
+    },
+    {
+      "path": "config/runtime-config-manifest.json",
+      "sha256": "0b00ae21020e6d8367421b6b18532ed80c90c74fc031018bfa303d475316894f"
+    },
+    {
+      "path": "config/runtime-contract.json",
+      "sha256": "cab039d7bd75d378fb9666e2b62216dd74c1940e5e59c7d97624959050bd0bdb"
+    },
+    {
+      "path": "config/runtime-core-packaging.full.json",
+      "sha256": "ba911cc0eece6e0f2ee8bb763e0666f6b43b859e5f95b223f084a7fc63c63b9f"
+    },
+    {
+      "path": "config/runtime-core-packaging.json",
+      "sha256": "78ce0ccacba41256d41ed68fdfede89d9c923c91f5866faddc20d8e8a7ba6c2a"
+    },
+    {
+      "path": "config/runtime-core-packaging.minimal.json",
+      "sha256": "cf375ce809807fb4303a02870a26457fa150db2beb058287c5190e71fc5e3baf"
+    },
+    {
+      "path": "config/runtime-input-packet-policy.json",
+      "sha256": "440b06c3990f2c001e63ac872db5e754c9aea817d60f81bbaeba0e0b39e0e0ac"
+    },
+    {
+      "path": "config/runtime-modes.json",
+      "sha256": "dc2aed869a8f60e9c563b9b5b0009ef26874846a03b488db681a5218b9908980"
+    },
+    {
+      "path": "config/runtime-script-manifest.json",
+      "sha256": "0d2c900bad5373bf27ce09013db660221a150346f74aa118ded365eb9af42fa0"
+    },
+    {
+      "path": "config/secrets-policy.json",
+      "sha256": "647138d7d8de3c1fbced1046871994ed640efdbdc91eb5a535facca337c2b6bc"
+    },
+    {
+      "path": "config/settings.template.codex.json",
+      "sha256": "e4dbf2abf25b0ceb03f290b649fe54abce73269ba742c82abed246d3d2fea17a"
+    },
+    {
+      "path": "config/skill-alias-map.json",
+      "sha256": "8d0e58614277b7941fe873df0eaebdf0be125323872f2869599182c032bdaaae"
+    },
+    {
+      "path": "config/skill-execution-safety-policy.json",
+      "sha256": "db311a9526e0f93fc8d4ba4ca7a47f03b03d04152d0b7b0c5d42127a6a9caa8c"
+    },
+    {
+      "path": "config/system-design-overlay.json",
+      "sha256": "18c2c839c2a8c18f01e2e54b4bef3d7ee358a6c6f37190e1ef633a1e69dfd6a1"
+    },
+    {
+      "path": "config/tool-registry.json",
+      "sha256": "9ae439deeddcff7c162299df94a5c4bf4cf6c3723162c8de5bb7f4ab095a89e5"
+    },
+    {
+      "path": "config/upstream-lock.json",
+      "sha256": "8532b7a79f3cd252b36b684346e787ad5f17ca04d524e18c8991dc2167b03494"
+    },
+    {
+      "path": "config/version-governance.json",
+      "sha256": "eb98043f54ba2fb611c156f9251ea28bcb6373b99301706d0be26633cfaf6766"
+    },
+    {
+      "path": "config/vibe-entry-surfaces.json",
+      "sha256": "9ca73051c55079500ca6e284f13ad86515aa5dce70addd1be6a8e107b178480d"
+    },
+    {
+      "path": "config/workspace-memory-plane.json",
+      "sha256": "5d812c5157826b292dca7a1dbc7a262b013daccd84f17c73e2a89357aeab2e2e"
+    },
+    {
+      "path": "core/skill-contracts/v1/vibe.json",
+      "sha256": "7e0d38b5ff7c0596e489223a96c4c5cfb4cbd73bb55b4d2129400ac0e6aec44d"
+    },
+    {
+      "path": "packages/contracts/pyproject.toml",
+      "sha256": "2c2d068df9bab940403c42ff5c00a64d973afc3782d851032e3811138d85dd03"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/__init__.py",
+      "sha256": "b381f56dd91240330b1c84ba87a4619396b499845b6f5c81e8143631fab6ce86"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/adapter_descriptor.py",
+      "sha256": "82e760518b32824ff20ca07aa2ae4430630f835c89f19024efd904a8630d8e3d"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/adapter_registry_support.py",
+      "sha256": "cf6d6dc90fe96359cf60638171316d3b332ab355c501f3a87e111c4d4dbb45a5"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/canonical_vibe_contract.py",
+      "sha256": "bd402ed119714bc2d356072afd00b3ea42edaadd30e0613904e748bd96a68226"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/catalog_descriptor.py",
+      "sha256": "84d8195cf7b9731d834297d29f6eb9ca28c9cd32c929aae5b80349e2c301be24"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/discoverable_entry_surface.py",
+      "sha256": "3c8b7ba6e48917e037b68482a903b5db5728a7c41ea86d4afb0229fba89a4bde"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/entry_root_guard.py",
+      "sha256": "ee4e0a78c09b552d322bc7d45465c857dd05cc7988b3bd0c81ccc685088ace0e"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/governance_runtime_roles.py",
+      "sha256": "951474f85bdcce94d3985034a1ee60df47be08e5d1b54d9743e07bfbcb4c59a5"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/host_launch_receipt.py",
+      "sha256": "c7eb75030d068b60e9a077f1cde0c6e0cd9c15876827bfb55c33e03c6718c646"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/host_runtime_readiness.py",
+      "sha256": "71d459a442f4e2d33ad753b69ef44da956242f3f38706a3c957ce0bcc56b1d63"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/install_ledger.py",
+      "sha256": "150f15f4839e3fe74d7e1011b3423125f441329485fffa929d8064ef1b001183"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/installed_runtime_contract.py",
+      "sha256": "69e6135469d386383644eb3f24d0e1c961a684a3edb59881347cd8b6d3d47a4a"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/live_governance_contract.py",
+      "sha256": "e05965ddaf0ba92685db1630528b7cab898a192c7b1d5d170db32054afaf7d3f"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/mirror_topology_contract.py",
+      "sha256": "2baa03ff3c9b2bd62f9bb7d8c58cb86532e7b1aacb4d8d54697d9dc511b62cc1"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/runtime_packet.py",
+      "sha256": "d2a2325ec869b102b1dabdc5ae16dd4e78cfe1c19d16dd90dc7de4bb61102caf"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/runtime_surface_contract.py",
+      "sha256": "42e17857f9d39766abc761d84d8fe9e1d551089c8932de2d5e567dfc5823f42f"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/target_root_contract.py",
+      "sha256": "9ba611f43e90a279c66bf5d4566d522da1de1d46921a05508263444727106352"
+    },
+    {
+      "path": "packages/contracts/src/vgo_contracts/verification_scenario.py",
+      "sha256": "8bab009a30a21bd5616a769bf21879591ba807f81ba5d688965870401ab4358e"
+    },
+    {
+      "path": "packages/runtime-core/pyproject.toml",
+      "sha256": "38f343fe8482dcc439e8546688482291bd02989f1670cedf4a0b75cfab70cbe6"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/__init__.py",
+      "sha256": "dd7fd1a1d191a413c84c7eb5112dfd621045d9006b5e961f6c3defacc8140aa9"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/artifact_contract.py",
+      "sha256": "113bd8428783419d168c31473dc52f80e11c1bdb51651b6561ab4ccac9f167dc"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/canonical_entry.py",
+      "sha256": "e73449382265773227b1bce5a3d4a13c07c38dc7c9b1fbae3bf6c0f9ceba3d79"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/compatibility_exit.py",
+      "sha256": "9b4871f19c4e557d2711c41f9f173e5ea41e8d3f0c9c19c229a4a8fca4cbc977"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/custom_admission.py",
+      "sha256": "eae51efb31c0c24e5d958e6a820c04377a3acc52b21ac814720970f00dbd3864"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/entry_locator.py",
+      "sha256": "cf0cd38a8ea164ff2f64800089dfc0fc3bcfc7841407955030e56a3b2760ac2f"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/entry_policy.py",
+      "sha256": "be0956e6c05dad67e9b59851646120d84114436b223c588e67748dc3ec780093"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/governance.py",
+      "sha256": "d53c6be318c001a247cdf56f2199e0b52bee6cc458b640255efe353dd4a42434"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/grade_intent.py",
+      "sha256": "72f04877d6a35cb4a7b41b1328bb398028cf99414b3578474e59ecdd8b2c3d7e"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/__init__.py",
+      "sha256": "8979cf6a0147ffcbae0108d6e67da43e916030af78913c98cb9d98d35cba4d56"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/capability_bridge.py",
+      "sha256": "94d3ecec95953c070b212c24219905d56c95039df4b790056f3e901347d97f63"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/executor.py",
+      "sha256": "132464ff1a0e581eb9bcf9b4b64b52d7adb64c81d4812f978cb2f528ddd2f24e"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/finder.py",
+      "sha256": "38c6325c297834874aebf0d3d49726dec2ce6f46d63a085e747c607769334efc"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/host_skill_roots.py",
+      "sha256": "7e49bae02a33009646040c446360d86b8b6ca8cabefe642c48b22004f4ee1cbf"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/loop.py",
+      "sha256": "db15529e41554e548a360ebe4648e45bca2ce6dccdb40df05cb2572c0a1d5cf5"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/module_assignments.py",
+      "sha256": "af5a6249fc755dce7140496ce2010e724507e979b4062e57a944945e4bf84549"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/planner.py",
+      "sha256": "e966019fde37ba9ea92028836f6fae1702363d061afec492f33551e33515645e"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/run_state.py",
+      "sha256": "03b7840161b960bf9c2b61a1e6feb1780e999e4380b38ca80704a0bd490a24c9"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/skill_index.py",
+      "sha256": "8b64a0b1e27ab3e70438e686ccd87366271694cf7045f5a6ce92543ff59a7ad8"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/skill_manifest.py",
+      "sha256": "d3b6e50d2c286f300215c573750ab44d8f43d947658157db7876eb9f16852574"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/task_card.py",
+      "sha256": "77071bbdc7c48067472e071e62adbef826c1f3714165576c3d1ad917bf59729b"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/text_tokens.py",
+      "sha256": "6697fe651a2d4c1a42287b2c7adbd7a41df2816394979b0233ae2196fc7b3892"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/verifier.py",
+      "sha256": "0e89d0c43fef6d595759c7d9d582beb1250330ff8f843e77400bcaab93f1bb9a"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/kernel/work_plan.py",
+      "sha256": "b3dd48fb2350343cc1f479da5143883ab3f5a792364118e5452541d235e9afe6"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/memory.py",
+      "sha256": "504869aeea17adb4ad192167064131ebfd4ccc97e5719d4eb4db829ec8f4a656"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/planning.py",
+      "sha256": "4453655e6c6eb013f56afd34db382ea49f2f54fabb6d6b1b058af2efe283fa9f"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/powershell_bridge.py",
+      "sha256": "0de94d9cbdcc7ce8f78cd75d2f0b35b9f8659832204ae516aa921c23230fb239"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/route_index.py",
+      "sha256": "7468e4e1dddd76b21e2c5794a9c1bd945002d58ae66485e058d5c8c0710dd03c"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/router_contract_runtime.py",
+      "sha256": "7bb7db7324ecb0c4ffb37e1603a0bb061b7073b717651ae6f9bcda9e10d4e2cf"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/runtime_bridge.py",
+      "sha256": "7a6dd2e9e616283323f1dc28b3e684a26a41f9cbcd41693fcf6d5c89d206234e"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/runtime_summary.py",
+      "sha256": "a54fda96982b294c98b64e7674e0424f6d178aba7437fd9987c6fae94e2076f1"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/runtime_support.py",
+      "sha256": "98f1e6354d12103cba4bcffba96e908267b964c74aafd8cc2c3cac77fba674c2"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/runtime_truth.py",
+      "sha256": "3168e4b0bd388c789920e55c94a8cf25f5e28ad0d1cc7740bcba50ebd2812637"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/stage_machine.py",
+      "sha256": "eb1f777c57be09ca9042847d3c6ccfcce3ae665472551b8aee6329395432210b"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/stage_stop.py",
+      "sha256": "d27c04035a8b5e3cdbd7a714081078cd187163a428acac37fcff1c60f4a28e43"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/task_intent.py",
+      "sha256": "7497931a5a8b28ad8ee68657aee417962aa529cc6d841ca63f96de4bb872b146"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/workspace_memory.py",
+      "sha256": "591a3a0b7f21c456b942bcb9fa3f17f01cd75ba73b551b159cfe8b4903bb8665"
+    },
+    {
+      "path": "packages/runtime-core/src/vgo_runtime/workspace_memory_schema.py",
+      "sha256": "73db63fbb0e696f47ddf6818e5827f0ccf029bfa114112f76360d44b62719257"
+    },
+    {
+      "path": "packages/verification-core/pyproject.toml",
+      "sha256": "0674b0970f48d830590f60b1f187034a05f34638a6817fa2d9e0469ee590e024"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/__init__.py",
+      "sha256": "7a026f98f7ff28672a590b4b4e887390e0eeb217bb0f53945892118483918e6a"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/_bootstrap.py",
+      "sha256": "65e8a1b4a71a73402575044f17b9f2c0133a961946ce2add80233b3266cff26a"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/_io.py",
+      "sha256": "53c1f29f8eef3c246220bc35d3c23a794aaf85fba22e66ee6557c06157330d2b"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/_repo.py",
+      "sha256": "87dcceb5a7c53f82f5833e2e10e69a9f8573f43e1fb0025006f5b868b06f8d4a"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/bootstrap_doctor.py",
+      "sha256": "654288a9ccde04e250a9ca4a29b4f8d39cbc75cfd67325faa02ba963d58d9f67"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/bootstrap_doctor_runtime.py",
+      "sha256": "19bc89cf17299d89d2dc17f54d7a08c9d1e2bba64a1293a2c64a47bd9a296c87"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/bootstrap_doctor_support.py",
+      "sha256": "bdbe9f63639e039ee1e09c0661884e523bf7c0946e52544d7e0cf9e2d74e138d"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/gate_engine.py",
+      "sha256": "0e1e8e082c487209276d9404d99581af055e2597ba75e1d154fb4bb7a0413a9c"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/opencode_preview_smoke.py",
+      "sha256": "76784d4e811784c742d15769c7d42c4a9a699dee1881f5fea68648053f168ff7"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/opencode_preview_smoke_runtime.py",
+      "sha256": "9b8219897f5f45e9bf629059ef93a5a53056fbc012f31c5ef65016a90b101b68"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/opencode_preview_smoke_support.py",
+      "sha256": "cf75e9ff6ca50dd08cbe083ac47aef9e20efbe96b1f96ca2ce60a22603971e37"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/policies.py",
+      "sha256": "f3b633d0b3516037088f243f28201c315a843e7cd526aeab1e7b7029f16b2698"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/proof_publication.py",
+      "sha256": "58acdcc02b5f17eb8f64b9be872d93dc39c4b34ab8fcccea466b7d2a01973d78"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/release_notes_quality.py",
+      "sha256": "5f9aa5a7ae27a67216a2c4b42a06b0f50f0a93f027e33c3198322d2645eb15a8"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/release_notes_quality_runtime.py",
+      "sha256": "c6dc30b2fe3981413fc4804628e0277a9d188390d4e89167e8780db08ea2d3f2"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/release_notes_quality_support.py",
+      "sha256": "7c4c17a99c18ab57db54056015096b58916009ca8631ab7d348572fede1ca043"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/release_truth.py",
+      "sha256": "91565c5ffad64ded9555e1b14170e67905b9e25eb363bd476fc8220d031c44c5"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/router_ai_connectivity_probe.py",
+      "sha256": "6bcbe0e63ef80a0e8c801021420e202a3cfacd73c45cb2cc01896589f0eefe8c"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/router_ai_probe_advice.py",
+      "sha256": "84a1ab0404b7cafc254b152004fd49a76097f57c5f57975a2d5314bf00569771"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/router_ai_probe_support.py",
+      "sha256": "540c78b93f4ba10454c49c338b1508f65bb042a68eb415a9113885f2a1456928"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/router_ai_probe_vector.py",
+      "sha256": "d30ce77d05f5cf2a0750331403b4fb8dc243481fd5ad44a40e7ed343db4579c2"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/router_bridge_gate.py",
+      "sha256": "ef1ee929fc451c731743c01911e07d0be5d6a8b5d9a2f3da107958d80138d704"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/router_bridge_gate_runtime.py",
+      "sha256": "f4c2e50a8c495bb0918ffc5258fe7c6c3ddc1666a14be2b01acfe25278b1072d"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/router_bridge_gate_support.py",
+      "sha256": "660339ee8244b71cc8cf4828183de285b29a89d50d29116134bb3652b635c3bb"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/runtime_coherence.py",
+      "sha256": "aebf939b815d23c5b452e689bbc0ac4ea47d43219754792bc6bd11995529b209"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/runtime_coherence_runtime.py",
+      "sha256": "f8328453a748e12df428fc0ca6c260bb2e043f2a9939707785a995931dc6d600"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/runtime_coherence_support.py",
+      "sha256": "4ae8de9623bddff54082e9723f0d0b2464700edab56db9cd8dafa7b84cd4f45f"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/runtime_delivery_acceptance.py",
+      "sha256": "d39246c22684c40776ed5feaa578e5c8c37ad677bf1c9cfd59f88c759959298b"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/runtime_delivery_acceptance_runtime.py",
+      "sha256": "2713a0d3672b5fb4c2d06b801121265992cb26e5d074c7149cd833d6aad1d1d5"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/runtime_delivery_acceptance_support.py",
+      "sha256": "7b1762df40596463349042a1e514e5a8e162ae954d42d522010389f31cb9c1b1"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/runtime_freshness.py",
+      "sha256": "1daebfa1c4bd85302533d331ac3d975c68530b190dade2415071771f11a82592"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/scenario_runner.py",
+      "sha256": "19a9e1bc28c77a7b9520e838fe2f02baa89ec55b8a7aa189e636214481390e6f"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/scenarios/install_matrix.json",
+      "sha256": "0e28f09192dec9d73330447864eeae8e7cc5c9c2749f707caf85a068d059fad5"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/scenarios/runtime_matrix.json",
+      "sha256": "b0e79d988bd567746f2f2d3884d085157e63502763c1082f5a17ac78c38410ba"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/test_baseline_audit.py",
+      "sha256": "42419b1ab9dbba81cee874b63c7cef95edb1170a6711f84829ef72bb354ea14a"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/workflow_acceptance.py",
+      "sha256": "f9082c466178bea77ff7cefac897f2ba10fb1443f3fbc56fb3e8f76cfff09b09"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/workflow_acceptance_runtime.py",
+      "sha256": "b1c18c51e2357c7ae75b7cb5243fde19a81f77185b58e474077846c7ab1b51fb"
+    },
+    {
+      "path": "packages/verification-core/src/vgo_verify/workflow_acceptance_support.py",
+      "sha256": "09b9e004d26a55777d5e44ff07e43faa4ac0696fa76a377d551ec6a86209d2d4"
+    },
+    {
+      "path": "protocols/do.md",
+      "sha256": "e194cf70960cf968d9a6c590735a4d4e5aa1dc635d7c0e277dcf49706795630b"
+    },
+    {
+      "path": "protocols/retro.md",
+      "sha256": "76495fcda2d03646ed3239ae6459d3fefc891561e44096e4684f69ee61c160d4"
+    },
+    {
+      "path": "protocols/review.md",
+      "sha256": "f9fc60fcacf2d0fa302b006c73b02e0c72920c02123a6df03721263045bf7f3a"
+    },
+    {
+      "path": "protocols/runtime.md",
+      "sha256": "00e91000a6b644ff054ebca801579d70f0bfef2b7374f9b67a6e1e5ac25b0653"
+    },
+    {
+      "path": "protocols/team.md",
+      "sha256": "a7ca50022c738bf09603859cb0ac4cf549d1bc3294c1ffe450d702a46d041aeb"
+    },
+    {
+      "path": "protocols/think.md",
+      "sha256": "acbb7b05adbadabd9de97871e1896da95992bb3e4ab055d6215549deb02c10ee"
+    },
+    {
+      "path": "scripts/common/AntiProxyGoalDrift.ps1",
+      "sha256": "33f5309a1767165eb58fcd44be34a0df45e59e11a61ac7da46c3eb71f03b5366"
+    },
+    {
+      "path": "scripts/common/adapter_registry_query.py",
+      "sha256": "498b881f84726f13405cbbc1c5db0a89acbdd1f2e7e75b2a5f2d64548b8f18f2"
+    },
+    {
+      "path": "scripts/common/python_helpers.sh",
+      "sha256": "bd8488b0bb6195cfce267963f4f0781197afa47d3210a3533fb891610427b848"
+    },
+    {
+      "path": "scripts/common/vibe-governance-helpers.ps1",
+      "sha256": "2ab217a377b994fa6e4d0afd52390a857fde605b54b70e3950b4b78355f1d66f"
+    },
+    {
+      "path": "scripts/router/invoke-pack-route.py",
+      "sha256": "11ce2986ea16a5e675c3c75381fed85c4a655061f4e0808d9fe4f0e0d3027cfc"
+    },
+    {
+      "path": "scripts/router/modules/00-core-utils.ps1",
+      "sha256": "84ffdfae4780baf55808cdb3bc8ba2cd468524a18bfbac41f33946244c07fa6d"
+    },
+    {
+      "path": "scripts/router/modules/01-openai-responses.ps1",
+      "sha256": "78fbdedadf3f11ef0a7c60e3630966ecaa1ae99f9f54b50f20e039c019486a64"
+    },
+    {
+      "path": "scripts/router/modules/10-observability.ps1",
+      "sha256": "b69c80d40b7e833dde79fb3656b5063e61721be9e5074edc3af10fb1ac449d57"
+    },
+    {
+      "path": "scripts/router/modules/11-route-probe.ps1",
+      "sha256": "4c532542bda64dd7c5b6d2b88355e83400b83acc3424347ef3ac32934eca58ed"
+    },
+    {
+      "path": "scripts/router/modules/12-heartbeat.ps1",
+      "sha256": "5b7c7b68407e4bf91e942e0ece8b179341d673bfdcb7792777b29b6a5cadc53c"
+    },
+    {
+      "path": "scripts/router/modules/19-custom-admission.ps1",
+      "sha256": "8e51bb7034a1f3de1a2ac64edee8dfd6645fe8a7989b0d032961b7ca51b8517d"
+    },
+    {
+      "path": "scripts/router/modules/20-routing-rules.ps1",
+      "sha256": "c13a527c8b74ba9778fca362adcafbf73221e96358481ecb81b6a27f16e29751"
+    },
+    {
+      "path": "scripts/router/modules/21-capability-interview.ps1",
+      "sha256": "408facebd298dd318b624a2c78dd6adc2e136241aef2ba2a424077b6f9e45c4a"
+    },
+    {
+      "path": "scripts/router/modules/22-intent-contract.ps1",
+      "sha256": "8ec061b698b5002eeab09ae7373f9c807dfb2731b8cbb2ec20bf9c3fefe2d7d7"
+    },
+    {
+      "path": "scripts/router/modules/30-openspec.ps1",
+      "sha256": "e522f1db5db40cca7daeb08a465751b6a7ebb06fd5cbd13a85d3aee9bb8c8e66"
+    },
+    {
+      "path": "scripts/router/modules/31-gsd-overlay.ps1",
+      "sha256": "2e74cdd69411952d6602983f373514d919b75f151cedbacb4625355f68edae94"
+    },
+    {
+      "path": "scripts/router/modules/32-prompt-overlay.ps1",
+      "sha256": "fceb36ad88ec6177f9bada8b48922816162161bb0bd28515829f577a15fa006b"
+    },
+    {
+      "path": "scripts/router/modules/33-memory-governance.ps1",
+      "sha256": "46caa3d9048c691f58a4c856c8029f5d968f50e072627569f54c2993c9b52a02"
+    },
+    {
+      "path": "scripts/router/modules/34-data-scale-overlay.ps1",
+      "sha256": "ecb8f33bed000945be72647d896b04e6dbaa00b5a0914fdb9f033696fcb9d067"
+    },
+    {
+      "path": "scripts/router/modules/35-quality-debt-overlay.ps1",
+      "sha256": "8742e6f798343033ef0a9c8aa2179546d1848a82936bba2adf32e56f63d2eaeb"
+    },
+    {
+      "path": "scripts/router/modules/36-framework-interop-overlay.ps1",
+      "sha256": "22fc3c824329ebbfef0ce9a0d89b3860df3edcd04414901fed1d731e213d05eb"
+    },
+    {
+      "path": "scripts/router/modules/37-ml-lifecycle-overlay.ps1",
+      "sha256": "a815591fd189321ee5a3ef53a22f5fc59764fa0124fd8242800484c38a2c1a00"
+    },
+    {
+      "path": "scripts/router/modules/38-python-clean-code-overlay.ps1",
+      "sha256": "a9ff6ac965e5155da60f39062bff5271f06bf0d0090e9d952100b4593c1057be"
+    },
+    {
+      "path": "scripts/router/modules/39-system-design-overlay.ps1",
+      "sha256": "0b1e67a69edd902296e14019988c9bff37b9302a5ff0a5cd4c47c5b04c1e6593"
+    },
+    {
+      "path": "scripts/router/modules/40-cuda-kernel-overlay.ps1",
+      "sha256": "6a8852120e1db10fd3088b7df1f0b6e713220aa7d4d9942cc161a036e05e2337"
+    },
+    {
+      "path": "scripts/router/modules/42-ai-rerank-overlay.ps1",
+      "sha256": "529cf432f95abb3df496f4bec24d23dfa175b984afee90aa1f0c76edd492fc7f"
+    },
+    {
+      "path": "scripts/router/modules/43-retrieval-overlay.ps1",
+      "sha256": "7c59ffe175f0ad81eab7d120f9b7d41adb9826285aede0d5704aa3f2d649cbf3"
+    },
+    {
+      "path": "scripts/router/modules/44-dialectic-team-gate.ps1",
+      "sha256": "e28828c819b49c87aa0220859712f6b29202e04489fea7cff38a3c64507e0e6f"
+    },
+    {
+      "path": "scripts/router/modules/44-exploration-overlay.ps1",
+      "sha256": "6ff3e1aacda0eb04fb02524e9be1938495b811bb5e05af37c41aece43af97f20"
+    },
+    {
+      "path": "scripts/router/modules/45-daily-dialectic-guard.ps1",
+      "sha256": "cb83925bec4a76922388224bc01923b30110fb808d26ecdb3510de87e556536f"
+    },
+    {
+      "path": "scripts/router/modules/47-closure-overlay.ps1",
+      "sha256": "6b54fc9502b68b0a2b281c802db95ca48243d2b62ce60c08ab4b23a9e017e06d"
+    },
+    {
+      "path": "scripts/router/modules/48-llm-acceleration-overlay.ps1",
+      "sha256": "11729fd654efb17876737da90d0cf9b8f3eb8d62ba93132b48e6321067ddfee7"
+    },
+    {
+      "path": "scripts/router/modules/49-prompt-asset-boost.ps1",
+      "sha256": "7b97b8ea7274bf3688243c19e185f296169c4ae87fa287d35bade052f07d81a3"
+    },
+    {
+      "path": "scripts/router/resolve-pack-route.ps1",
+      "sha256": "f80ba86d42826c72fec7038d31937af0adfe3251697ee3ce19d2891c2741f136"
+    },
+    {
+      "path": "scripts/router/runtime_neutral/custom_admission.py",
+      "sha256": "fed7b62cdfd87b26b53afea1de5dac64124db53a26672feb65e5609955bb5998"
+    },
+    {
+      "path": "scripts/router/runtime_neutral/router_contract.py",
+      "sha256": "c797ef20e1768fc61dc750ae24e7b5ca004b4641cdc27afb50e483a9c8232ea5"
+    },
+    {
+      "path": "scripts/runtime/Freeze-RuntimeInputPacket.ps1",
+      "sha256": "9b6bf02c50c671355ec8e106f12da5fa8ee32b2856a19cdbef2199cd270ce810"
+    },
+    {
+      "path": "scripts/runtime/Invoke-AntiProxyGoalDriftCompaction.ps1",
+      "sha256": "40cf012e777b0a8ebe13686afe5220da4b78ef301599ef9afd5fae13b16dfa71"
+    },
+    {
+      "path": "scripts/runtime/Invoke-DeepInterview.ps1",
+      "sha256": "08e55e6ac77bb16e4390713f20dfc646005f0c9b6656c2fd80f3a58c4e0f54ea"
+    },
+    {
+      "path": "scripts/runtime/Invoke-PhaseCleanup.ps1",
+      "sha256": "821d61c8a082583e0e9b968214783af3f5ab85e4b2d3ad004e5ff6b79404f9d3"
+    },
+    {
+      "path": "scripts/runtime/Invoke-PlanExecute.ps1",
+      "sha256": "27475f55477c53dcb1b42b0691a362c13bcf842bf6f93cf0773ae8afcbeeb9f7"
+    },
+    {
+      "path": "scripts/runtime/Invoke-SkeletonCheck.ps1",
+      "sha256": "4d56f9f6680bdfbf69b39f222d13a103030e13c902d7acb47a2869a99dc6eaca"
+    },
+    {
+      "path": "scripts/runtime/Invoke-VibeCanonicalEntry.ps1",
+      "sha256": "3f3330f1550e3acb5359632f31fd03bdd9a4ca5c8b9adfee4472a94a2e882bf8"
+    },
+    {
+      "path": "scripts/runtime/VibeMemoryActivation.Common.ps1",
+      "sha256": "faa3f29f740a4cec0f8ecf1f1760d2a33de79618a3072317a54c188708ac3df2"
+    },
+    {
+      "path": "scripts/runtime/VibeMemoryBackends.Common.ps1",
+      "sha256": "7dec843fe986845191264274cadf5caa350302a9c890611f5fd85cddebf2050c"
+    },
+    {
+      "path": "scripts/runtime/VibeRuntime.Common.ps1",
+      "sha256": "6aeabddeb061ca4b0cce5814f73ad9816e16df1779a08eb5611245574d6daaf7"
+    },
+    {
+      "path": "scripts/runtime/VibeSkillRouting.Common.ps1",
+      "sha256": "3b2c83342bdfbaacf79c75e985fd019e1c570056ba47dd3a8f9e2a5854aa01af"
+    },
+    {
+      "path": "scripts/runtime/VibeWorkspaceMemory.Common.ps1",
+      "sha256": "b8b3d3d2ffea4c79e9800d6aa4f2bf1a49c94da4aeb9f4fae032b9c61f0e319c"
+    },
+    {
+      "path": "scripts/runtime/Write-RequirementDoc.ps1",
+      "sha256": "dda2c3959ca28565e8ca23167441bf38b38ebbefd1fbc23d3932075f86a5535b"
+    },
+    {
+      "path": "scripts/runtime/Write-XlPlan.ps1",
+      "sha256": "9f6b8c406431caa9ca3a1dd25e492ef885252df164e3ba1ba97e4b5b8db6af07"
+    },
+    {
+      "path": "scripts/runtime/invoke-vibe-runtime.ps1",
+      "sha256": "dbd8f3aee046bb15df52643924f3e741b5684c6874d1cceac31bfe6d353594ab"
+    },
+    {
+      "path": "scripts/runtime/memory_backend_driver.py",
+      "sha256": "e376011eb97a704a81f3012745b2eb22df63af4cf4f04981a63e2a33799c1ffe"
+    },
+    {
+      "path": "scripts/runtime/workspace_memory_driver.py",
+      "sha256": "cc4a933cc95c5d9e9f197ac760178f59a8a8ff6759a5a5e0ff3450a6638cf998"
+    },
+    {
+      "path": "scripts/verify/runtime_neutral/_bootstrap.py",
+      "sha256": "c208725c351ef3b2805c4c73dd9d68dbd223b021a4cf16309327a1028faf8c33"
+    },
+    {
+      "path": "scripts/verify/runtime_neutral/bootstrap_doctor.py",
+      "sha256": "df389372b4d82ff04d3a4aac6e15605d11828733f70c3aa3a245484ef6ccc90e"
+    },
+    {
+      "path": "scripts/verify/runtime_neutral/coherence_gate.py",
+      "sha256": "4a4c292cd88734998ff023b7458b4715aa41c4a9516acaa9e1f22d4c646f5b6a"
+    },
+    {
+      "path": "scripts/verify/runtime_neutral/freshness_gate.py",
+      "sha256": "5b2be6d4a5accfc5e515a218b57b9c182632cbd1410260ccd26f9e0c8744a304"
+    },
+    {
+      "path": "scripts/verify/runtime_neutral/opencode_preview_smoke.py",
+      "sha256": "5fe510adab367253397bcc2e95f6c08891f5721938b9d6de773808b27c4b9294"
+    },
+    {
+      "path": "scripts/verify/runtime_neutral/release_notes_quality.py",
+      "sha256": "7102ed9b2ec45b0f0ac5c66483f9fdfd6b5e1c8947151a2a4d72b7501688ddff"
+    },
+    {
+      "path": "scripts/verify/runtime_neutral/release_truth_gate.py",
+      "sha256": "2b8de0661e63981d39561932f72635e0385493efd009a0d7f60e3f4db52c14d2"
+    },
+    {
+      "path": "scripts/verify/runtime_neutral/router_ai_connectivity_probe.py",
+      "sha256": "b038ff472f5f33af250c7831d03c7ee6fc2deb6ed8872e782009fcab77c824f5"
+    },
+    {
+      "path": "scripts/verify/runtime_neutral/router_bridge_gate.py",
+      "sha256": "66bbe4eb418b3b3d74544993d4e38593e80f616869a3afa580e4be465ecb55f6"
+    },
+    {
+      "path": "scripts/verify/runtime_neutral/runtime_delivery_acceptance.py",
+      "sha256": "af99a82ba99d48477e3c530dbb2fc8ca21ef72b369211ed0ecf90915b0bab1fe"
+    },
+    {
+      "path": "scripts/verify/runtime_neutral/workflow_acceptance_runner.py",
+      "sha256": "783d4248d5cffc0601f68362a66eaae9420a82e2c912090ac622f2fff46e3d0e"
+    },
+    {
+      "path": "scripts/verify/vibe-bom-frontmatter-gate.ps1",
+      "sha256": "d0f2e3c36686caf6376a7dd2c857fd3848d1d987519831c497a73b15ea6d30f2"
+    },
+    {
+      "path": "scripts/verify/vibe-bootstrap-doctor-gate.ps1",
+      "sha256": "800a74502585e2a4afa24603761afcd008b73a055d4b5f3cdd17e2726a8da0b6"
+    },
+    {
+      "path": "scripts/verify/vibe-canonical-entry-truth-gate.ps1",
+      "sha256": "9bfb454d154372a9aa842305243820b5aaa03f67a0a9d378069d610c4f27ef5a"
+    },
+    {
+      "path": "scripts/verify/vibe-governed-runtime-contract-gate.ps1",
+      "sha256": "878240396d2d909a08a410789725f0c7a42d4b01923ee49128854ba95f3b7984"
+    },
+    {
+      "path": "scripts/verify/vibe-installed-runtime-freshness-gate.ps1",
+      "sha256": "7654a6f48ac435262b7344656f64e65b3dd173abdd415158bdac4bd616794a22"
+    },
+    {
+      "path": "scripts/verify/vibe-linux-router-no-pwsh-gate.ps1",
+      "sha256": "c785b5186622c0732d33cf2aadbf0ecb267fcb633c9191943497d71fd5114759"
+    },
+    {
+      "path": "scripts/verify/vibe-no-self-introduced-fallback-gate.ps1",
+      "sha256": "c7b8f337b14926d2975a880f4cc7a4a5527d14ce9c4696c8610029a93ef11943"
+    },
+    {
+      "path": "scripts/verify/vibe-no-silent-fallback-contract-gate.ps1",
+      "sha256": "6ab94e2708ac0dac0faf14e2082380ab945e8d66b6de241b1710179759d72c6a"
+    },
+    {
+      "path": "scripts/verify/vibe-release-install-runtime-coherence-gate.ps1",
+      "sha256": "66251aec217aefbd7beca3fa85716bb54359085ccee9010a484140f693031eba"
+    },
+    {
+      "path": "scripts/verify/vibe-release-truth-consistency-gate.ps1",
+      "sha256": "2a80a0b5607bf5f2131af80a28244a4958bc0bb9a534eaee5603e32c6c1c83ab"
+    },
+    {
+      "path": "scripts/verify/vibe-runtime-execution-proof-gate.ps1",
+      "sha256": "92e54d74efd946118df0a7fea2db27408366c4e3f7a9a51bce4635c4ac909963"
+    }
+  ],
+  "install_root": "C:\\Users\\jonhy\\.agents\\skills\\vibe",
+  "installed_at_utc": "2026-10-02T18:40:32Z",
+  "installer_version": "4.1.0",
+  "package_digest_sha256": "4bfe1ceb54ad293cca6656cddebb39f046413b1bac0287887834b505f579b5b8",
+  "package_version": "4.1.0",
+  "receipt_kind": "vibe-skill-install",
+  "release": {
+    "asset_digest_sha256": "8f62b03162f949a3a17346c11d52f1d6105392264db846b7b0fb182a9258a864",
+    "asset_name": "vibe-skills-4.1.0-public.zip",
+    "version": "4.1.0"
+  },
+  "schema_version": 1,
+  "skill_id": "vibe",
+  "skills_dir": "C:\\Users\\jonhy\\.agents\\skills",
+  "source_kind": "public_release"
+}
