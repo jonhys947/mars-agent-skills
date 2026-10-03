@@ -1,4 +1,4 @@
-﻿api-design-standards
+api-design-standards
 bash-strategy
 code-review
 code-review-riscv
@@ -27,6 +27,7 @@ icon-design
 iconography-and-imagery
 interface-design
 karpathy-guidelines
+mars-orchestrator
 memory-management
 performance-core
 performance-go

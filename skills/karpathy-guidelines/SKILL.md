@@ -7,17 +7,18 @@ description: Behavioral guidelines to reduce common LLM coding mistakes. Use whe
 
 Behavioral guidelines to reduce common LLM coding mistakes, derived from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls.
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+Use these guidelines to reduce avoidable assumptions and scope drift while still completing authorized work. Investigate evidence and make routine, reversible technical choices within the request; reserve questions for consequential unknowns.
 
 ## 1. Think Before Coding
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+**Use evidence. Surface material uncertainty. Make authorized choices.**
 
 Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+- Inspect relevant code, tests, configuration, documentation, and the user's stated constraints before deciding what is unclear.
+- Separate observed facts from assumptions. Make ordinary implementation choices that fit the evidence and project conventions, and summarize consequential choices when useful.
+- Ask only when an unresolved ambiguity materially changes the outcome, scope, safety, data handling, authorization, or ability to proceed. Do not stop for routine details that can be decided from the available evidence.
+- Present alternatives when they represent real tradeoffs the user needs to decide; otherwise choose the simplest supported option.
+- Push back when evidence shows the requested approach will not meet the stated goal or conflicts with a governing requirement.
 
 ## 2. Simplicity First
 
@@ -27,7 +28,7 @@ Before implementing:
 - No abstractions for single-use code.
 - No "flexibility" or "configurability" that wasn't requested.
 - No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
+- Prefer the smallest change that satisfies the full request and its relevant constraints.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
@@ -52,9 +53,11 @@ The test: Every changed line should trace directly to the user's request.
 **Define success criteria. Loop until verified.**
 
 Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
+- "Add validation" → "Enforce the specified invalid-input behavior and verify it with the project-appropriate check"
+- "Fix the bug" → "Use a focused reproduction or other evidence to confirm the fix"
+- "Refactor X" → "Verify the behavior that the refactor is meant to preserve"
+
+Tests are one verification method, not a universal prerequisite or deliverable. Use the project's required checks and add or run tests when the request, project workflow, or concrete risk calls for them. Test-first is useful for many bug fixes, but do not require deleting valid work or following TDD when the task or project directs another method.
 
 For multi-step tasks, state a brief plan:
 ```
@@ -102,10 +105,10 @@ def export_users(format='json'):
 - Assumed which fields to include
 - Assumed CSV fieldnames without checking actual data structure
 
-**✅ What Should Happen (Surface Assumptions)**
+**✅ What Should Happen (Check Evidence; Ask Only About Material Gaps)**
 
 ```
-Before implementing, I need to clarify:
+Before implementing, inspect existing export routes, data contracts, authorization rules, and tests. If they do not define the following decisions, ask because they affect privacy and the user-visible result:
 
 1. **Scope**: Export all users or filtered subset? (privacy implications)
 2. **Format**: You mentioned "export" - did you mean:
@@ -115,10 +118,7 @@ Before implementing, I need to clarify:
 3. **Fields**: Which user fields? (some might be sensitive)
 4. **Volume**: How many users typically? (affects approach)
 
-Simplest approach: Add an API endpoint that returns paginated JSON.
-Would need more info for file-based exports.
-
-What's your preference?
+Do not invent an endpoint or export every field. If the repository already establishes the format and field policy, follow it. If those consequential decisions remain unspecified, ask only about the missing decisions.
 ```
 
 ### Example 2: Multiple Interpretations
@@ -129,7 +129,7 @@ What's your preference?
 
 ```python
 # Adds caching, database indexes, and async processing
-# without asking which "faster" matters
+# without checking the requested outcome or measuring the current path
 @lru_cache(maxsize=1000)
 async def search(query: str) -> List[Result]:
     # ... 200 lines of optimization code
@@ -138,25 +138,9 @@ async def search(query: str) -> List[Result]:
 **✅ What Should Happen**
 
 ```
-"Make the search faster" could mean:
+First inspect the search path, its current tests and any available measurements. Identify whether the evidence points to response time, throughput, or perceived latency. Do not invent a baseline, target, or effort estimate.
 
-1. **Faster response time** (< 100ms instead of 500ms)
-   - Add database indexes
-   - Cache frequent queries
-   - Estimated effort: 2 hours
-
-2. **Handle more concurrent searches** (throughput)
-   - Add async/await
-   - Connection pooling
-   - Estimated effort: 4 hours
-
-3. **Faster perceived speed** (UX)
-   - Show partial results immediately
-   - Progressive loading
-   - Estimated effort: 3 hours
-
-Current search takes ~500ms for typical queries. 
-Which aspect matters most for your use case?
+If the request and repository evidence support a low-risk optimization, implement and verify it. Ask for a target or priority only when different interpretations would lead to materially different work and no existing requirement resolves the choice.
 ```
 
 ---
@@ -455,26 +439,20 @@ I'll fix the authentication system by:
 **✅ What Should Happen (Verifiable Goals)**
 
 ```
-To "fix authentication," I need to define success criteria. 
-What specific issue are we solving?
+For "fix authentication," first inspect the reported issue, auth contract, relevant code, and tests. If those sources identify the defect, use that as the success criterion. If no specific failure or intended behavior is available, ask what outcome needs to change.
 
-If the issue is "users stay logged in after password change":
+For example, if the reported issue is "users stay logged in after password change":
 
 Plan:
-1. Write test: Change password → verify old session invalidated
-   Verify: Test fails (reproduces bug)
+1. Confirm the behavior using an existing test or a focused reproduction; add a regression test if it is useful and in scope.
 
-2. Implement: Invalidate sessions on password change
-   Verify: Test passes
+2. Implement: Invalidate sessions on password change according to the existing auth design.
 
-3. Check edge cases: Multiple active sessions, concurrent changes
-   Verify: Additional tests pass
+3. Check relevant edge cases, such as multiple active sessions or concurrent changes, when the design and risk make them applicable.
 
-4. Verify no regression: Existing auth tests still pass
-   Verify: Full test suite green
+4. Run the focused verification and other project-required gates that apply; report exactly what passed or remains unverified.
 
-Current test coverage for auth: [shows coverage]
-What's the specific auth issue you're seeing?
+If the code and issue report leave a consequential behavior decision unresolved, ask only about that decision before proceeding.
 ```
 
 ### Example 2: Multi-Step with Verification
@@ -489,36 +467,15 @@ What's the specific auth issue you're seeing?
 # No clear verification steps
 ```
 
-**✅ What Should Happen (Incremental with Verification)**
+**✅ What Should Happen (Use the Existing Policy and Verify Its Boundaries)**
 
 ```
-Plan for rate limiting:
+Inspect the existing API policy, middleware, storage, and tests. Use the configured limits, scope, and storage behavior if they are defined. Verify requests at the allowed limit and just beyond it, plus the relevant reset or concurrency behavior.
 
-1. Add basic in-memory rate limiting (single endpoint)
-   Verify: 
-   - Test: 100 requests → first 10 succeed, rest get 429
-   - Manual: curl endpoint 11 times, see rate limit error
-
-2. Extract to middleware (apply to all endpoints)
-   Verify:
-   - Test: Rate limits apply to /users and /posts
-   - Existing endpoint tests still pass
-
-3. Add Redis backend (for multi-server)
-   Verify:
-   - Test: Rate limit persists across app restarts
-   - Test: Two app instances share rate limit counter
-
-4. Add configuration (rates per endpoint)
-   Verify:
-   - Test: /search allows 10/min, /users allows 100/min
-   - Config file parsed correctly
-
-Each step is independently verifiable and deployable.
-Start with step 1?
+Do not choose numeric limits, endpoints, an in-memory or distributed backend, or a migration plan without support from the request or project design. If a missing policy changes the implementation materially, ask about that policy; otherwise implement the authorized scope and its integration checks.
 ```
 
-### Example 3: Test-First Verification
+### Example 3: Evidence-First Verification
 
 **User Request:** "The sorting breaks when there are duplicate scores"
 
@@ -530,34 +487,34 @@ def sort_scores(scores):
     return sorted(scores, key=lambda x: (-x['score'], x['name']))
 ```
 
-**✅ What Should Happen (Reproduce First)**
+**✅ What Should Happen (Check the Stated Ordering Contract)**
 
 ```python
-# 1. First, write a test that reproduces the issue
+# If ties are required to sort alphabetically, verify that contract:
 def test_sort_with_duplicate_scores():
     """Test sorting when multiple items have same score."""
     scores = [
-        {'name': 'Alice', 'score': 100},
         {'name': 'Bob', 'score': 100},
+        {'name': 'Alice', 'score': 100},
         {'name': 'Charlie', 'score': 90},
     ]
     
     result = sort_scores(scores)
     
-    # The bug: order is non-deterministic for duplicates
-    # Run this test multiple times, it should be consistent
-    assert result[0]['score'] == 100
-    assert result[1]['score'] == 100
-    assert result[2]['score'] == 90
+    assert result == [
+        {'name': 'Alice', 'score': 100},
+        {'name': 'Bob', 'score': 100},
+        {'name': 'Charlie', 'score': 90},
+    ]
 
-# Verify: Run test 10 times → fails with inconsistent ordering
+# Compare current behavior with the stated tie-break rule.
 
-# 2. Now fix with stable sort
+# If it violates the contract, make the smallest supported correction:
 def sort_scores(scores):
     """Sort by score descending, then name ascending for ties."""
     return sorted(scores, key=lambda x: (-x['score'], x['name']))
 
-# Verify: Test passes consistently
+# Verify using the project's relevant test or check.
 ```
 
 ---
@@ -566,10 +523,10 @@ def sort_scores(scores):
 
 | Principle | Anti-Pattern | Fix |
 |-----------|-------------|-----|
-| Think Before Coding | Silently assumes file format, fields, scope | List assumptions explicitly, ask for clarification |
+| Think Before Coding | Ignores available contract and invents behavior | Check project evidence; ask only about consequential gaps |
 | Simplicity First | Strategy pattern for single discount calculation | One function until complexity is actually needed |
 | Surgical Changes | Reformats quotes, adds type hints while fixing bug | Only change lines that fix the reported issue |
-| Goal-Driven | "I'll review and improve the code" | "Write test for bug X → make it pass → verify no regressions" |
+| Goal-Driven | "I'll review and improve the code" | State the requested outcome and the relevant verification |
 
 ## Key Insight
 

@@ -1,111 +1,35 @@
 ---
 name: error-handling-ts
-description: TypeScript/JavaScript error handling patterns. Requires error-handling-core.
+description: TypeScript and JavaScript error handling patterns using existing project conventions.
 ---
 
-# TypeScript/JavaScript Error Handling Implementation
+# TypeScript/JavaScript Error Handling
 
-## Error Type Definition
+Use the application's existing error classes, promise conventions, logger, and response mapping. Do not add a custom error framework or dependency solely to follow this skill.
+
+## Represent and Propagate Failures
+
+- Preserve the original cause when adding operation context. Use the built-in `cause` option only when the project's runtime and TypeScript target support it; otherwise use the established wrapper pattern.
+- Add a domain-specific `Error` subclass only when callers need stable classification or structured data. Reuse shared error types rather than creating one class per message or code.
+- Catch an error only when the current layer can recover, translate, or add useful context. Otherwise let the existing error path handle it.
+- Keep internal details and secrets out of user-facing messages.
 
 ```typescript
-// src/errors/auth/Error156.ts
-export interface RemediationAction {
-    name: string;
-    execute: () => Promise<boolean>;
-    fallback?: RemediationAction;
-}
-
-export class Error156 extends Error {
-    readonly code = "E-156";
-    readonly severity = "HIGH";
-    
-    constructor(
-        readonly userId: string,
-        readonly expiresAt: Date
-    ) {
-        super(`E-156: Authentication token expired for user ${userId}`);
-        this.name = "Error156";
-    }
-
-    remediation(): RemediationAction {
-        return {
-            name: "RefreshAuthToken",
-            execute: async () => {
-                await authService.refreshToken(this.userId);
-                return true;
-            },
-            fallback: {
-                name: "ReauthenticateUser",
-                execute: async () => {
-                    await authService.reauthenticate(this.userId);
-                    return true;
-                }
-            }
-        };
-    }
+try {
+  return await store.loadDocument(id);
+} catch (cause) {
+  throw new Error(`load document ${id} failed`, { cause });
 }
 ```
 
-## Dual-Channel Logger
+This is an illustrative wrapper. Confirm `Error` cause support for the project's runtime and target before using this exact form.
 
-```typescript
-type LogMode = "both" | "ai" | "human";
+## Logging and Recovery
 
-class HybridLogger {
-    constructor(
-        private mode: LogMode = "both",
-        private level: string = "info"
-    ) {}
+- Log through the configured logger at a boundary that can act on the failure, and avoid logging the same error at every layer.
+- Follow the application's severity and retry policy. A log level alone does not decide whether to retry, return a response, or escalate.
+- Keep retries and remediation explicit in the owning flow; classifying an error should not itself trigger side effects.
 
-    error(err: Error & { code?: string }) {
-        if (err.code && this.mode !== "human") {
-            console.log(`ai:ERROR ${err.code}`);
-        }
-        if (this.mode !== "ai") {
-            console.log(`${new Date().toISOString()} ERROR ${err.message}`);
-        }
-    }
-}
-```
+## Testing Error Behavior
 
-## Property-Based Testing (fast-check)
-
-```typescript
-import fc from "fast-check";
-
-describe("Error156 Properties", () => {
-    it("always returns code E-156", () => {
-        fc.assert(fc.property(
-            fc.string(),
-            fc.date(),
-            (userId, expiresAt) => {
-                const err = new Error156(userId, expiresAt);
-                return err.code === "E-156";
-            }
-        ));
-    });
-
-    it("message contains user ID when non-empty", () => {
-        fc.assert(fc.property(
-            fc.string().filter(s => s.length > 0),
-            fc.date(),
-            (userId, expiresAt) => {
-                const err = new Error156(userId, expiresAt);
-                return err.message.includes(userId);
-            }
-        ));
-    });
-
-    it("remediation has fallback", () => {
-        fc.assert(fc.property(
-            fc.string(),
-            fc.date(),
-            (userId, expiresAt) => {
-                const err = new Error156(userId, expiresAt);
-                const remediation = err.remediation();
-                return remediation.fallback !== undefined;
-            }
-        ));
-    });
-});
-```
+Test the caller-visible behavior: preserved cause or classification, recovery, response mapping, and relevant edge cases. Use the project's existing test runner and assertion style. Property-based tests are optional when an invariant over a broad input space benefits from them; do not add a package just to use one.

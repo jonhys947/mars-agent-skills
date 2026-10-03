@@ -1,94 +1,40 @@
 ---
 name: error-handling-go
-description: Go-specific error handling patterns. Requires error-handling-core.
+description: Go error handling patterns using the project's existing conventions.
 ---
 
-# Go Error Handling Implementation
+# Go Error Handling
 
-## Error Type Definition
+Use ordinary Go `error` values and the project's established package boundaries, logging, and response conventions. Do not add an error framework or dependency solely to follow this skill.
 
-```go
-// errors/auth/error156.go
-package auth
+## Return and Wrap Errors
 
-import (
-    "context"
-    "fmt"
-    "time"
-)
-
-type Error156 struct {
-    UserID    string
-    ExpiresAt time.Time
-}
-
-func (e Error156) Error() string {
-    return fmt.Sprintf("E-156: Authentication token expired for user %s at %s",
-        e.UserID, e.ExpiresAt)
-}
-
-func (e Error156) Code() string { return "E-156" }
-func (e Error156) Severity() string { return "HIGH" }
-
-// Optional remediation
-func (e Error156) Remediation() RemediationAction {
-    return &RefreshTokenAction{UserID: e.UserID}
-}
-```
-
-## Remediation Interface
+- Return errors to the layer that can recover, translate, or report them.
+- Add operation context with `%w` when callers may need to inspect the underlying error.
+- Use `errors.Is` for sentinel errors and `errors.As` for established typed errors.
+- Define a sentinel or custom type only when callers need a stable classification or structured domain data. Do not create one type or code for every error message.
+- Avoid exposing internal details or secrets in user-facing messages.
 
 ```go
-type RemediationAction interface {
-    Name() string
-    Execute(ctx context.Context) error
-    Fallback() RemediationAction
+func loadDocument(ctx context.Context, id string) (*Document, error) {
+	doc, err := store.Load(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("load document %q: %w", id, err)
+	}
+	return doc, nil
 }
+
+// At a boundary that can choose the response or recovery:
+if errors.Is(err, ErrNotFound) {
+	return notFoundResponse()
+}
+logger.Error("load document failed", "document_id", id, "error", err)
 ```
 
-## Dual-Channel Logger
+Adapt logger calls, field names, and boundary placement to the repository. Do not log and return the same failure at every layer.
 
-```go
-type HybridLogger struct {
-    mode  string // "both", "ai", "human"
-    level string
-}
+## Testing Error Behavior
 
-func (l *HybridLogger) Error(err error) {
-    if coder, ok := err.(interface{ Code() string }); ok {
-        if l.mode != "human" {
-            fmt.Printf("ai:ERROR %s\n", coder.Code())
-        }
-    }
-    if l.mode != "ai" {
-        fmt.Printf("%s ERROR %s\n", time.Now().Format(time.RFC3339), err.Error())
-    }
-}
-```
+Test the behavior callers rely on: classification, wrapping, recovery, or safe response. Prefer the project's existing test tools. For example, a wrapping test can assert `errors.Is(err, ErrNotFound)` without depending on the full error string.
 
-## Property-Based Testing
-
-```go
-func TestError156Properties(t *testing.T) {
-    properties := gopter.NewProperties(nil)
-
-    properties.Property("Error156 always returns code E-156", prop.ForAll(
-        func(userId string) bool {
-            err := auth.Error156{UserID: userId}
-            return err.Code() == "E-156"
-        },
-        gen.AnyString(),
-    ))
-
-    properties.Property("Error message contains user ID", prop.ForAll(
-        func(userId string) bool {
-            if userId == "" { return true }
-            err := auth.Error156{UserID: userId}
-            return strings.Contains(err.Error(), userId)
-        },
-        gen.AnyString().SuchThat(func(s string) bool { return s != "" }),
-    ))
-
-    properties.TestingRun(t)
-}
-```
+Property-based or fuzz tests can help when there is a meaningful invariant over a broad input space, but are optional and do not justify adding a dependency by themselves.

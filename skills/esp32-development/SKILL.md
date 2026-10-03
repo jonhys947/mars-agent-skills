@@ -5,7 +5,7 @@ description: ESP32 memory management, ISRs, FreeRTOS tasks, SPI, power managemen
 
 # ESP32 Development Best Practices
 
-Use this skill when writing code for ESP32 microcontrollers, whether using ESP-IDF, Arduino framework, or ESPHome components.
+Examples below cover different framework paths. Check the actual ESP32 SoC/module, board, ESP-IDF or Arduino core version, and whether the project uses ESPHome before applying one. Memory sizes, DMA capabilities, pins, ISR placement, task/core APIs, wake sources, and persistence behavior vary by target and framework; this skill does not select hardware bindings or introduce a framework.
 
 **Sources:**
 - [ESP-IDF Programming Guide](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/)
@@ -20,16 +20,18 @@ Use this skill when writing code for ESP32 microcontrollers, whether using ESP-I
 
 | Type | Size | Use For | Access |
 |------|------|---------|--------|
-| **DRAM** | 320 KB | Variables, heap, stack | Read/write, byte-aligned |
-| **IRAM** | 128 KB | ISRs, timing-critical code | Execute, 4-byte aligned |
-| **IROM** | Flash | Application code (via cache) | Execute only |
-| **DROM** | Flash | Constants, strings (via cache) | Read only |
-| **RTC** | 8 KB | Deep-sleep persistent data | Read/write |
+| **Internal RAM** | Varies by SoC/configuration | Data, stacks, and executable code | Check linker regions, capability flags, and cache behavior |
+| **Flash-mapped code/data** | Varies by module/configuration | Code or read-only data through cache | Not necessarily accessible during cache-disabled intervals |
+| **External PSRAM** | Optional; varies by board/configuration | Larger noncritical data pools | Not automatically DMA-capable or interchangeable with internal RAM |
+| **RTC/retention memory** | Varies by SoC | Data retained across supported sleep/reset modes | Confirm retention and wake semantics for the target |
+
+Use the selected chip's memory map and build map file rather than fixed ESP32-family capacities.
 
 ### Memory Placement Attributes
 
 ```cpp
-// Place function in IRAM (fast, ISR-safe)
+// ESP-IDF example only. Use an IRAM attribute when the target's cache/ISR
+// contract requires it, and ensure callees and data are also accessible.
 void IRAM_ATTR my_isr_handler() {
   // Critical timing code
 }
@@ -37,27 +39,28 @@ void IRAM_ATTR my_isr_handler() {
 // Place data in RTC memory (survives deep sleep)
 RTC_DATA_ATTR int boot_count = 0;
 
-// Place data in DRAM for DMA access
+// Example attributes; verify the selected peripheral's DMA memory contract.
 DMA_ATTR uint8_t dma_buffer[256];
 
-// Ensure word alignment for DMA
+// Example only; use the exact alignment required by the target/API.
 WORD_ALIGNED_ATTR uint8_t aligned_buf[64];
 ```
 
 ### Stack Considerations
 
 ```cpp
-// BAD: Large stack allocation
+// Example risk: a local object's size must fit this task's analyzed stack budget.
 void process() {
   uint8_t buffer[8192];  // Risk of stack overflow!
 }
 
-// GOOD: Heap allocation for large buffers
+// Possible alternative only if heap placement, ownership, failure handling,
+// lifetime, and concurrent calls fit the project design.
 void process() {
   auto buffer = std::make_unique<std::array<uint8_t, 8192>>();
 }
 
-// GOOD: Static allocation for fixed buffers
+// Possible alternative when a single shared lifetime and concurrency policy fit.
 void process() {
   static uint8_t buffer[8192];  // One instance, not on stack
 }
@@ -69,12 +72,12 @@ void process() {
 
 ### ISR Rules
 
-1. **Keep ISRs short** — Set flags, defer work to tasks
-2. **Use IRAM_ATTR** — ISR code must be in IRAM
-3. **No blocking calls** — No `delay()`, mutexes, or I/O
-4. **Use `std::atomic`** for shared variables (ESP32 supports it)
+1. Keep interrupt work bounded and defer noncritical processing when the architecture permits.
+2. Place handlers in IRAM only when required by the selected ESP-IDF interrupt/cache configuration; verify all reachable code and data.
+3. Do not block in an ISR. Use only APIs documented as safe for the selected interrupt context.
+4. Choose synchronization supported by the compiler, core, and ISR context; verify atomic lock-free behavior and alignment before using `std::atomic` in an ISR.
 
-### ISR Flag Pattern (Recommended)
+### ISR Flag Pattern (example; verify target support)
 
 Use `std::atomic<bool>` with `.exchange()` to avoid the read-clear race condition:
 
@@ -110,11 +113,11 @@ void loop() {
 }
 ```
 
-**Note:** `std::atomic` is lock-free on ESP32 for 8/16/32-bit types. Avoid on ESP8266/RP2040 (linker errors).
+**Note:** Atomic lock-free support is compiler-, type-, core-, and ABI-dependent. Verify the actual toolchain and ISR behavior; do not infer it from the ESP32 name alone.
 
 ---
 
-## FreeRTOS Task Management
+## FreeRTOS Task Management (only for FreeRTOS projects)
 
 ### Task Creation
 
@@ -130,7 +133,8 @@ xTaskCreate(
     &task_handle        // Handle
 );
 
-// Pin to specific core (ESP32 is dual-core)
+// Optional affinity example for a multi-core target. Many ESP32 variants or
+// project configurations have different core availability and scheduling needs.
 xTaskCreatePinnedToCore(
     task_function, "TaskName", 4096, nullptr, 5, &task_handle,
     1  // Core ID: 0 or 1
@@ -206,9 +210,13 @@ gpio_config(&io_conf);
 // Arduino style
 pinMode(4, OUTPUT);
 pinMode(5, INPUT_PULLUP);
+// Example numbers only: use the project/board's approved pin assignment.
 ```
 
-### Strapping Pins (Avoid or Use Carefully)
+### Strapping Pins (example list is classic ESP32 only)
+
+Never use the table below to assign pins on another ESP32 SoC or board. Check
+the target datasheet, module documentation, schematic, and project pin contract.
 
 | GPIO | Function | Safe to Use? |
 |------|----------|--------------|
@@ -251,7 +259,7 @@ spi_bus_config_t buscfg = {
     .mosi_io_num = MOSI_PIN,
     .miso_io_num = MISO_PIN,
     .sclk_io_num = SCLK_PIN,
-    .max_transfer_sz = 4096,  // DMA buffer size
+    .max_transfer_sz = 4096,  // Example only; use the SDK/peripheral's supported limit
 };
 ```
 
@@ -265,7 +273,8 @@ void write_register(uint8_t addr, uint8_t data) {
     spi_->transfer(addr);
     spi_->transfer(data);
   }
-  delayMicroseconds(15);  // Device settle time
+  // Wait only as required by the selected device datasheet/driver contract.
+  delayMicroseconds(15);  // Illustrative value, not a general SPI delay
 }
 ```
 
@@ -277,11 +286,11 @@ void write_register(uint8_t addr, uint8_t data) {
 
 | Mode | Wake Sources | Current | Use Case |
 |------|-------------|---------|----------|
-| Modem sleep | WiFi beacon | ~20 mA | Connected idle |
-| Light sleep | Timer, GPIO, UART | ~0.8 mA | Short idle periods |
-| Deep sleep | Timer, GPIO, ULP | ~10 µA | Long idle periods |
+| Modem sleep | WiFi beacon | Varies by SoC, board, and configuration | Connected idle |
+| Light sleep | Supported wake sources vary | Varies by SoC, board, and configuration | Short idle periods |
+| Deep sleep | Supported wake sources vary | Varies by SoC, board, and configuration | Long idle periods |
 
-### Deep Sleep Pattern
+### Deep Sleep Pattern (ESP-IDF example; verify SoC wake-source support)
 
 ```cpp
 #include "esp_sleep.h"
@@ -306,7 +315,7 @@ void setup() {
 
 ## WiFi Best Practices
 
-### Connection Management
+### Connection Management (Arduino-ESP32 example)
 
 ```cpp
 // Use event-driven connection handling
@@ -333,12 +342,10 @@ WiFi.begin(ssid, password);
 ### Memory with WiFi
 
 ```cpp
-// WiFi uses significant heap (~50KB)
-// Check free heap before large allocations
+// WiFi memory cost depends on the SoC, protocol stack, config, buffers, and
+// runtime state. Measure the active build and preserve its required headroom.
 size_t free_heap = esp_get_free_heap_size();
-if (free_heap < 20000) {
-  ESP_LOGW(TAG, "Low memory: %d bytes", free_heap);
-}
+ESP_LOGI(TAG, "Free heap: %u bytes", static_cast<unsigned>(free_heap));
 ```
 
 ---
@@ -413,7 +420,7 @@ int64_t start = esp_timer_get_time();  // Microseconds
 int64_t elapsed_us = esp_timer_get_time() - start;
 ```
 
-### Safe Delays
+### Safe Delays (framework-specific APIs)
 
 ```cpp
 // Short delays (doesn't yield to RTOS)
@@ -427,11 +434,17 @@ vTaskDelay(pdMS_TO_TICKS(10));
 
 ---
 
-## Persistent Storage
+## Persistent Storage (use the project's established backend)
 
-### ESPHome Preferences (Recommended)
+Storage APIs and guarantees vary by framework. Do not switch a project to
+ESPHome Preferences or raw NVS because of this example; follow its existing
+persistence contract, recovery behavior, and write-frequency requirements.
 
-**Always prefer ESPHome's preference system over raw NVS.** It handles caching, batched writes, and wear leveling automatically.
+### ESPHome Preferences (only for ESPHome components)
+
+For an ESPHome component, its preference system may be appropriate and has
+framework-specific caching and write behavior; confirm those semantics for the
+installed ESPHome version.
 
 **Docs:** [developers.esphome.io/blog/2026/02/12/entity-preferences](https://developers.esphome.io/blog/2026/02/12/entity-preferences-use-make_entity_preference-instead-of-get_preference_hash/)
 
@@ -471,11 +484,16 @@ pref.save(&empty);       // load() will succeed but is_valid() returns false
 - Hashes must be unique across all preferences in the firmware
 - Use `fnv1_hash("descriptive_string") + index` for stable, readable hashes
 - The `version` parameter in `make_entity_preference<T>(version)` is XOR'd into the hash — bumping it silently invalidates old data
-- Writes are cached in RAM and flushed periodically — no flash wear concern for infrequent config changes
+- Writes are cached in RAM and flushed periodically in this framework; still consider flash endurance, power-loss semantics, and the project's persistence requirements
 
-### Raw NVS (Low-Level)
+### ESP-IDF NVS (only when the project uses direct NVS)
 
-Only use raw NVS when ESPHome preferences don't fit (e.g., variable-length data, custom namespaces):
+An ESP-IDF application that already uses direct NVS may use its documented API for an appropriate object. This is not an alternative to select automatically for an ESPHome or Arduino project.
+
+The sequence below is illustrative and omits error handling. Check every API
+result and follow the application's established atomicity, versioning, integrity,
+readback, and recovery contract where one exists; a successful single-key write
+does not by itself satisfy a multi-step persistence contract.
 
 ```cpp
 #include "nvs_flash.h"
@@ -488,7 +506,12 @@ nvs_commit(handle);
 nvs_close(handle);
 ```
 
-### Wear Leveling
+### Write frequency
+
+Avoid unnecessary flash writes, batch related changes where the contract permits,
+and account for the storage layer's erase/write granularity and recovery behavior.
+
+### Wear-leveling example (ESP-IDF NVS)
 
 ```cpp
 // Avoid frequent writes to same key
@@ -599,15 +622,19 @@ for (int i = 0; i < 1000; i++) {
 }
 ```
 
-### 4. Flash Cache Miss in ISR
+### 4. Flash Cache Restrictions in ISR (conditional)
 
 ```cpp
-// BAD: Calling flash-resident code from ISR
+// Unsafe when this interrupt can run while flash cache is unavailable:
 void IRAM_ATTR isr() {
   Serial.println("ISR");  // May crash!
 }
 
-// GOOD: Only IRAM code in ISR
+// Example: defer work. If cache-off execution is required, verify all reachable
+// code and data follow the selected target's documented placement rules.
+// This flag only illustrates event publication: volatile alone is not C++
+// inter-context synchronization and a bool can coalesce events. Use the
+// project's verified ISR-safe handoff and consumer for the actual runtime.
 volatile bool flag = false;
 void IRAM_ATTR isr() {
   flag = true;  // Just set flag
@@ -618,8 +645,8 @@ void IRAM_ATTR isr() {
 
 ## Debugging Tips
 
-1. **Monitor heap**: `ESP.getFreeHeap()`, `heap_caps_get_free_size()`
-2. **Monitor stack**: `uxTaskGetStackHighWaterMark()`
+1. **Monitor heap**: use the target/framework API (`ESP.getFreeHeap()` for Arduino-ESP32, `heap_caps_get_free_size()` for ESP-IDF)
+2. **Monitor stack**: use the selected FreeRTOS/SDK API and confirm its units/meaning
 3. **Use assertions**: `configASSERT()`, `ESP_ERROR_CHECK()`
 4. **Core dumps**: Enable in menuconfig for crash analysis
 5. **JTAG debugging**: For step-through debugging

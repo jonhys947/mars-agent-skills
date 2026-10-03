@@ -1,42 +1,29 @@
 ---
 name: embedded-firmware
 description: >
-  Embedded firmware and device drivers — BSP development, peripheral driver
-  implementation (UART, SPI, I2C, GPIO, DMA, Timer), RTOS integration (FreeRTOS,
-  Zephyr), and system validation. Use when writing chip bring-up firmware,
-  implementing HAL drivers, porting an RTOS, or validating firmware on hardware.
-version: 1.0.0
-author: chuanseng-ng
+  Embedded firmware and device-driver guidance for BSPs, peripherals, RTOS
+  integration, and hardware validation. Use when a task concerns MCU firmware;
+  follow the target project's silicon, architecture, toolchain, and contracts.
 license: MIT
 allowed-tools: Read, Write, Bash
+metadata:
+  version: 1.0.0
+  author: chuanseng-ng
 ---
 
-# Skill: Embedded Firmware & Device Drivers
+# Embedded Firmware & Device Drivers
 
-## Invocation
+## How to use this guidance
 
-When this skill is loaded and a user presents a firmware or BSP task, **do not
-execute stages directly**. Immediately spawn the
-`digital-chip-design-agents:firmware-orchestrator` agent and pass the full user
-request and any available context to it. The orchestrator enforces the stage
-sequence, loop-back rules, and sign-off criteria defined below.
+Use only the sections relevant to the requested firmware work. This is a set of
+reference considerations, not a required stage sequence, sign-off workflow, or
+artifact list. Follow the active project's instructions and toolchain; do not
+assume an external orchestrator, agent, memory store, RTOS, or build system is
+available.
 
-Use the domain rules in this file only when the orchestrator reads this skill
-mid-flow for stage-specific guidance, or when the user asks a targeted reference
-question rather than requesting a full flow execution.
-
-## Pre-run Context
-
-Before executing or advising on **any** stage, read the following files if they exist:
-
-1. `memory/firmware/knowledge.md` — known failure patterns, successful tool flags, PDK/tool quirks.
-   Incorporate its guidance into every stage decision. If absent, proceed without it.
-2. `memory/firmware/run_state.md` — current run identity (`run_id`, `design_name`, `tool`,
-   `last_stage`). Use this to resume correctly after interruption. If absent, a new run
-   is starting; the orchestrator will create this file before the first stage.
-
-This pre-run read applies whether this skill is loaded by a user or called by the
-orchestrator mid-flow. It ensures the fix database is consulted before any diagnosis step.
+Before editing, consult the target's existing requirements, board/SoC documentation,
+startup code, build configuration, adjacent drivers, and tests as relevant. Do not
+create run-state or memory files unless the project or user requests them.
 
 ## Purpose
 Guide BSP creation, peripheral driver development, RTOS integration, and
@@ -45,7 +32,10 @@ to run on real silicon — correctness here enables all subsequent SW developmen
 
 ---
 
-## Supported EDA Tools
+## Example toolchains (choose from the target project)
+
+These are examples, not a supported-tool mandate. Use the compiler, debugger,
+simulator, vendor SDK, and version already selected by the project.
 
 ### Open-Source
 - **GCC cross-compiler** (`arm-none-eabi-gcc`, `riscv64-unknown-elf-gcc`) — bare-metal firmware compilation
@@ -60,206 +50,89 @@ to run on real silicon — correctness here enables all subsequent SW developmen
 
 ---
 
-## Stage: bsp_development
+## BSP and startup considerations (when in scope)
 
-### Domain Rules
-1. Startup code (`crt0.S`/`startup.c`) must in order:
-   - Set stack pointer to `__stack_top` (from linker script)
-   - Copy `.data` LMA → VMA
-   - Zero `.bss`
-   - Call `SystemInit()`
-   - Branch to `main()`
-2. `SystemInit()` order: power stable → PLLs → clock mux → peripherals
-3. Interrupt controller: define vector table, IRQ enable/disable API, priority API
-4. `memory_map.h`: ALL peripheral base addresses and register offsets — no magic numbers
-5. All hardware register accesses: `volatile` pointer dereference
-6. Atomic read-modify-write on hardware registers: disable IRQ or use atomic ops
-7. Memory barriers (DMB/DSB or equivalent) around hardware access sequences
-8. BSP must be RTOS-agnostic — no OS API calls in BSP layer
+Use the selected MCU's reference manual, vendor startup/SDK, linker script, ABI,
+and the project's existing boot flow. If the project owns startup code, check
+that reset/vector setup, stack selection, data initialization, clock setup, and
+entry into application code follow that target's requirements. Reuse existing
+device headers and linker symbols; do not require names such as `memory_map.h`,
+`SystemInit()`, `__stack_top`, `crt0.S`, or a new startup file. Register access,
+read-modify-write protection, barriers, and RTOS layering depend on the target
+and register semantics.
 
-### QoR Metrics to Evaluate
-- Boot: chip reaches `main()` within expected startup time
-- Clocks: all PLLs locked; peripherals clocked correctly
-- Interrupts: vector table valid; default handler traps unhandled exceptions
-- Memory: `.data` initialised; `.bss` zeroed (verify with memory read)
+Possible checks when applicable: vector validity and default exception handling,
+clock readiness, initialized data and zeroed BSS, startup error paths, and
+measured boot timing. These are checks to select from, not mandatory outputs.
 
-### Common Issues & Fixes
-| Issue | Fix |
-|-------|-----|
-| PLL not locking | Check reference clock source; verify input frequency range |
-| Hang before `main()` | Toggle debug LED at each init step to isolate |
-| Stack overflow at boot | Increase `STACK_SIZE` in linker script |
-| `.data` not initialised | Verify crt0 LMA→VMA copy range; check AT clause |
+Possible artifacts, only if requested or needed by the existing architecture:
+startup/linker changes, board support code, build configuration, and focused
+bring-up notes.
 
-### Output Required
-- `startup.S` and `system_init.c`
-- `memory_map.h` (complete register definitions)
-- Linker scripts
-- BSP build system
+## Peripheral drivers
 
----
+Follow existing project APIs and error conventions. Use the native result type
+or a `void` operation where that is the established contract; do not introduce
+a mandatory `status_t` or HAL signature. Bound waits when the operation can
+otherwise hang and the contract allows a timeout. Document ownership and
+concurrency where relevant. Add DMA, power hooks, or asynchronous callbacks only
+when the selected peripheral, use case, and project API need them.
 
-## Stage: peripheral_drivers
-
-### Driver Architecture (HAL pattern)
-```c
-status_t PERIPH_Init(PERIPH_Type *base, const periph_config_t *config);
-status_t PERIPH_WriteBlocking(PERIPH_Type *base, const uint8_t *data, size_t len);
-status_t PERIPH_TransferNonBlocking(PERIPH_Type *base, periph_handle_t *h, periph_xfer_t *x);
-void     PERIPH_HandleIRQ(PERIPH_Type *base, periph_handle_t *handle);
-```
-
-### Domain Rules
-1. All register accesses: via `memory_map.h` — no inline hex addresses
-2. All polling loops: timeout counter; return error code on timeout
-3. All functions: return `status_t` — never `void` for operations
-4. Thread safety: document per-driver; note mutex requirement if not safe
-5. DMA: provide DMA variants for all high-bandwidth peripherals
-6. Power management: `suspend()`/`resume()` hooks for low-power modes
-7. Callbacks: callback function pointers for async completion
-
-### Required Peripheral Coverage
+### Example validation coverage (only for peripherals/features in scope)
 | Peripheral | Key Tests |
 |------------|-----------|
-| UART | Baud rate, parity, TX/RX loopback, DMA |
-| SPI | All 4 modes, master/slave loopback, DMA |
-| I2C | 7/10-bit addressing, repeated start, DMA |
-| GPIO | Input/output, pull resistors, edge interrupt |
-| Timer | Periodic, one-shot, PWM, input capture |
-| DMA | Channel config, completion callback, scatter-gather |
-| Watchdog | Init, refresh (kick), triggered reset |
+| UART | Configured baud/parity, relevant TX/RX path, and DMA if used |
+| SPI | Configured mode and relevant transfer path |
+| I2C | Addressing and transaction patterns required by the device |
+| GPIO | Configured input/output, pulls, and interrupts if used |
+| Timer | The periodic, one-shot, PWM, or capture mode actually used |
+| DMA | Only if the driver uses DMA: limits, completion, and error handling |
+| Watchdog | Only if enabled: service and expected reset behavior |
 
-### QoR Metrics to Evaluate
-- All peripheral loopback tests: PASS
-- DMA transfers: correct data at correct address
-- No infinite loops — all error paths return timeout status
-- All error paths return meaningful status codes
-
-### Output Required
-- Driver source files (.c/.h per peripheral)
-- Driver unit test suite
-- Driver API documentation (Doxygen-compatible)
+Choose correctness, timing, coverage, and diagnostics criteria from the feature
+contract and target requirements. Record only evidence requested by the task or
+the project's normal workflow.
 
 ---
 
-## Stage: rtos_integration
+## RTOS integration (only when an RTOS change is requested)
 
-### FreeRTOS Domain Rules
-1. Port layer: implement `portmacro.h` for target architecture
-2. Tick timer: hardware timer for RTOS tick (default 1 ms)
-3. Context switch: implement SVC and PendSV handlers or equivalent
-4. Heap: use `heap_4.c` (best-fit with coalescence)
-5. Stack sizing: profile with `uxTaskGetStackHighWaterMark()`; add 20% margin
-6. `configCHECK_FOR_STACK_OVERFLOW`: set to 2 during development
-7. Priority inversion: use mutexes with priority inheritance
-
-### RTOS-Aware Driver Rules
-1. Replace busy-wait with semaphore pend (ISR gives semaphore on completion)
-2. Shared peripheral: wrap with mutex; document max hold time
-3. DMA + RTOS: event flags or semaphore for DMA completion from ISR
-4. NEVER call non-`FromISR` FreeRTOS API from within ISR
-
-### QoR Metrics to Evaluate
-- RTOS boots: idle task runs; tick at correct rate
-- All tasks: created, scheduled, running
-- No stack overflow in 24-hour stress test
-- No deadlocks under concurrent peripheral access
-
-### Output Required
-- RTOS port layer files (if custom architecture)
-- `FreeRTOSConfig.h` configured for target
-- Multi-task integration test
+Use the RTOS and port already selected by the project. Do not add a FreeRTOS or
+Zephyr port, replace a scheduler, or change tick/heap/stack policy as a default
+driver task. For a FreeRTOS target, confirm the port's interrupt priority rules,
+task/stack units, allocator configuration, and ISR-safe APIs. Size stacks from
+measured and analyzed peak paths plus the project's justified margin; use the
+chosen RTOS's synchronization and priority-inheritance mechanisms when needed.
+Validate only the scheduling and concurrency behavior relevant to the change.
 
 ---
 
-## Stage: driver_validation
+## Driver validation (select checks relevant to the requested change)
+
+Match validation to the feature, available test environment, and project gates.
+The tiers below are examples; hardware access, overnight runs, and throughput
+targets are not implied by loading this skill.
 
 ### Validation Tiers
 | Level | Tests | Environment |
 |-------|-------|-------------|
-| Unit | Peripheral loopback | Bare-metal on HW |
-| Integration | Multi-peripheral DMA chains | RTOS on HW |
-| System | Full application scenario | RTOS on HW |
-| Stress | 24-hour high-throughput | Overnight on HW |
+| Unit | Focused unit or host test | Where a suitable test double exists |
+| Integration | Relevant interactions, such as DMA completion | Target or supported simulation |
+| System | Requested end-to-end scenario | Project's supported environment |
+| Stress | Workload and duration defined by the project | Only when required and available |
 
-### QoR Metrics to Evaluate
-- All peripheral driver tests: 100% PASS
-- Stress test: 24-hour run with 0 failures
-- No memory corruption (stack watermark stable)
-- Throughput: within 10% of theoretical maximum
+Use project-defined integration, power, reset, memory, timing, and acceptance
+criteria when they are in scope. Do not invent duration or pass-rate gates.
 
-### Output Required
-- Test results report
-- Performance measurements
-- Known limitations with workarounds
+## System integration and sign-off (project-defined)
 
----
+For changes that affect multiple peripherals or system behavior, evaluate only
+the interactions required by the task and existing requirements. Concurrency,
+sleep/wake, warm/cold reset, memory tests, power measurements, and stress runs
+are conditional on the design and its validation plan. Follow the project's
+actual sign-off gates; a firmware skill does not authorize a hardware test,
+publish a validated package, or declare a gate passed.
 
-## Stage: system_integration
-
-### Domain Rules
-1. All drivers must pass unit validation first
-2. Multi-peripheral concurrency: simultaneous UART + SPI + DMA + timer
-3. Power mode: enter/exit sleep; verify correct wake-up on each IRQ source
-4. Reset: warm and cold reset; verify all peripherals re-initialise
-5. Memory: full RAM walking-bit pattern test
-
-### QoR Metrics to Evaluate
-- System scenario: correct output vs golden reference
-- No lockups or unexpected resets in 1-hour system run
-- Power modes: current within 10% of spec
-- Reset recovery: fully functional after warm and cold reset
-
-### Output Required
-- System integration test report
-- Power consumption measurements
-- Bug list (HW vs SW classification)
-
----
-
-## Stage: firmware_signoff
-
-### Sign-off Checklist
-- [ ] All peripheral drivers: 100% unit test PASS
-- [ ] RTOS: no stack overflow, no deadlock
-- [ ] System integration test: PASS
-- [ ] 24-hour stress test: clean
-- [ ] Power modes: verified and measured
-- [ ] Reset: warm and cold verified
-- [ ] All P0/P1 bugs closed
-
-### Output Required
-- Validated firmware package
-- Test results report
-- Bring-up guide for silicon team
-- Known issues list
-
----
-
-## Memory
-
-### Write on stage completion
-After each stage completes (regardless of whether an orchestrator session is active),
-write or overwrite one JSON record in `memory/firmware/experiences.jsonl` keyed by
-`run_id`. This ensures data is persisted even if the flow is interrupted or called
-without full orchestrator context.
-
-Use `run_id` = `firmware_<YYYYMMDD>_<HHMMSS>` (set once at flow start; reuse on each
-stage update). Set `signoff_achieved: false` until the final sign-off stage completes.
-### Run state (write before first stage, update after each stage)
-Write `memory/firmware/run_state.md` as the **first action** before launching any tool:
-```markdown
-run_id:      firmware_<YYYYMMDD>_<HHMMSS>
-design_name: <design>
-tool:        <primary tool>
-start_time:  <ISO-8601>
-last_stage:  <first stage name>
-```
-Update `last_stage` after each stage completes. This file lets wakeup-loop prompts
-and resumed sessions identify the correct run without relying on in-memory state.
-Create the file and parent directories if they do not exist.
-
-### Optional: claude-mem index
-If `mcp__plugin_ecc_memory__add_observations` is available in this session, emit each
-applied fix as an observation to entity `chip-design-firmware-fixes` after writing to
-`experiences.jsonl`. Skip silently if the tool is absent — JSONL is the canonical record.
+Record results in the project's expected location and format when requested.
+Do not create persistent run-state or memory records by default, and report any
+validation that was not performed.

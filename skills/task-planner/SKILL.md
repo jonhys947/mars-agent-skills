@@ -7,30 +7,23 @@ description: Standards for creating implementation tasks (tasks.md). Use when br
 
 ## Purpose
 
-Ensure complete traceability by linking tasks to both requirements and design sections. This enables clear understanding of why each task exists and how to implement it.
+Keep tasks traceable to the user's requested outcome and to existing requirements or design documents when those sources are available. This helps explain why each task exists and how it fits the work without requiring artifacts the project does not use.
 
-## Task Granularity (The Rule of 3)
+## Task Granularity
 
-**CRITICAL CONSTRAINT:** No single implementation task should require modifying more than **3 files**.
+Size a task around one coherent outcome, its dependencies, ownership, and a way to verify it. There is no universal file-count limit: a behavior change may reasonably span the implementation, tests, and documentation that must change together.
 
-*   **Why?** To prevent "Context Overflow" in Fullstack/System engineers.
-*   **How to Break Down:**
-    *   *Bad:* "Implement Authentication" (Touches DB, API, UI).
-    *   *Good:*
-        1.  "Define Auth Types" (1 file: `types.ts`)
-        2.  "Create API Route" (1 file: `routes/auth.ts`)
-        3.  "Create DB Model" (1 file: `models/user.ts`)
-        4.  "Create Login Form" (1 file: `components/LoginForm.tsx`)
+Split work when parts can be implemented, reviewed, or verified independently, or when they need different owners or sequencing. Keep integration work explicit when separate tasks must come together. Avoid splitting a cohesive change into artificial one-file tasks or creating an implementation task that omits necessary cross-component behavior.
 
 ## Linking Rules
 
 ### Requirements Linking
 **Format**: `_Requirements: X.Y, X.Z_`
-- List requirement IDs from the requirements document.
+- Use requirement IDs when the project has a requirements source. Do not invent IDs or require a requirements document that does not exist; otherwise link the task to the user's stated outcome or acceptance criteria.
 
 ### Design Linking
 **Format**: `_Design: Section Name > Subsection Name_`
-- Reference section headings from the design document.
+- Reference relevant headings when a design document exists. Do not invent a design artifact just to fill in a link.
 
 ## Task Structure
 

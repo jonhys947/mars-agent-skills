@@ -1,32 +1,37 @@
 ---
 name: embedded-c-guidelines
-description: C99 embedded firmware — HAL Ops Table pattern, FreeRTOS static tasks/queues/semaphores, ISR-safe ring buffer, no-malloc policy, Unity test with mock drivers, CMake HOST/STM32 dual-build. For writing drivers (GPIO/UART/SPI/I2C), HAL abstraction, RTOS tasks, or MCU firmware (STM32/ESP32).
-triggers:
-  - embedded
-  - firmware
-  - HAL
-  - FreeRTOS
-  - MCU
-  - microcontroller
-  - STM32
-  - ESP32
-  - RTOS
-  - ring buffer
-  - Unity test
-  - mock driver
-  - embedded C
-  - peripheral driver
-  - hal_gpio
-  - hal_uart
+description: Embedded C guidance for firmware, drivers, interrupts, and RTOS code. The examples use C99, a function-pointer HAL, FreeRTOS, Unity, and CMake; follow the active project's language version, architecture, APIs, allocator policy, and test/build system.
+metadata:
+  triggers:
+    - embedded
+    - firmware
+    - HAL
+    - FreeRTOS
+    - MCU
+    - microcontroller
+    - STM32
+    - ESP32
+    - RTOS
+    - ring buffer
+    - Unity test
+    - mock driver
+    - embedded C
+    - peripheral driver
+    - hal_gpio
+    - hal_uart
 ---
 
 # Embedded C Guidelines
 
+## Scope and project fit
+
+The snippets mirror an upstream `base/c-embedded/` example and demonstrate one C99 + function-pointer HAL + FreeRTOS + Unity/CMake setup. That example tree is not bundled here; this reference does not require finding or creating it. These are patterns, not requirements for every MCU project. Before applying one, inspect the target's supported C standard, existing HAL and RTOS, ISR rules, allocation policy, toolchain, and test runner. Reuse those choices; do not add this architecture or ban dynamic allocation unless the project requirements call for it.
+
 ## Reference
 
-**Base code**: `base/c-embedded/` — C99 + CMake + HAL Ops Table + FreeRTOS 패턴
+**Original example source**: `base/c-embedded/` — C99 + CMake + HAL Ops Table + FreeRTOS pattern (not bundled here)
 
-## Core Architecture
+## Optional example architecture
 
 ```
 src/
@@ -49,9 +54,9 @@ src/
 
 ---
 
-## Pattern 1: HAL Ops Table (Function Pointer Table)
+## Example 1: HAL Ops Table (Function Pointer Table)
 
-**핵심 원칙**: 앱 코드는 HAL API만 호출. 플랫폼 드라이버는 런타임에 등록.
+**This example** routes application code through a HAL API and registers a platform implementation at runtime. Use an ops table only when it fits the existing architecture and dispatch needs.
 
 ```c
 /* hal_gpio.h — HAL 인터페이스 정의 */
@@ -101,9 +106,9 @@ hal_gpio_register(&GPIO_OPS);
 
 ---
 
-## Pattern 2: FreeRTOS Task — Static Allocation
+## Example 2: FreeRTOS Task — Static Allocation
 
-**핵심 원칙**: 태스크 TCB와 스택 정적 할당. `xTaskCreate` 대신 `xTaskCreateStatic` 사용.
+**This FreeRTOS example** statically allocates the task control block and stack. Choose static or dynamic task creation according to the project's determinism, memory, failure-handling, and FreeRTOS configuration requirements.
 
 > **FreeRTOSConfig.h 필수 설정** — 없으면 `xTaskCreateStatic` 링크 에러 + idle task 구현 필요:
 > ```c
@@ -174,9 +179,9 @@ configASSERT(h != NULL);   /* 반환값 필수 검사 — NULL 시 silent fault 
 
 ---
 
-## Pattern 3: FreeRTOS Queue — ISR → Task
+## Example 3: FreeRTOS Queue — ISR → Task
 
-**핵심 원칙**: ISR은 `xQueueSendFromISR` 사용. Task는 `xQueueReceive`로 블로킹 대기.
+**When using FreeRTOS**, use the matching ISR-safe API from interrupt context and a task-context receive API from tasks. Other RTOSes and bare-metal projects use their own documented signaling mechanisms.
 
 ```c
 /* 큐 정적 생성 (task_uart_monitor.c) */
@@ -238,15 +243,15 @@ void task_uart_monitor_run(void *pv_params) {
 
 ---
 
-## Pattern 4: Static Ring Buffer (ISR-Safe)
+## Example 4: Static Ring Buffer (ISR/Task)
 
-**핵심 원칙**: 정적 배열만 사용. 크기는 반드시 **2의 거듭제곱**. `head`/`tail`은 `volatile`.
+This implementation uses a static array and a bit mask, so its capacity must be a power of two. A modulo-based ring buffer need not have that size. `volatile` alone is not a general synchronization primitive; verify index atomicity and ISR/task ordering for the compiler and MCU, or use the project's supported atomic or critical-section mechanism.
 
 ```c
 /* ring_buffer.h */
 typedef struct {
     uint8_t  *buf;
-    size_t    capacity;        /* 반드시 2의 거듭제곱 */
+    size_t    capacity;        /* power of two for this mask-based implementation */
     size_t    mask;            /* capacity - 1 */
     volatile size_t head;      /* Read index  (consumer) */
     volatile size_t tail;      /* Write index (producer) */
@@ -284,7 +289,7 @@ void process_uart(void) {
 
 ---
 
-## Pattern 5: Unity Test with Mock Driver
+## Example 5: Unity Test with Mock Driver
 
 **구조**: 각 테스트 파일이 독립 실행파일. `setUp`/`tearDown` 중복 정의 충돌 없음.
 
@@ -343,7 +348,7 @@ add_test(NAME ring_buffer COMMAND test_ring_buffer)
 
 ---
 
-## CMake Dual Build
+## Optional CMake Host/Target Build Example
 
 ```cmake
 # CMakeLists.txt
@@ -422,7 +427,9 @@ typedef enum {
 
 ---
 
-## Porting to a New Platform
+## Porting this example to another platform
+
+Adapt these steps only when the project uses this HAL layout and CMake build; otherwise follow its existing platform and build conventions.
 
 1. `include/app_config.h` — 핀 번호, 스택 크기, 포트 번호 등 모든 커스터마이징 상수 정의
 2. `src/drivers/[platform]/gpio_[platform].c` 작성 — `hal_gpio_ops_t` 구현
@@ -432,32 +439,34 @@ typedef enum {
 
 ---
 
-## Anti-Patterns
+## Example project policies to evaluate
+
+The following examples reflect the reference project's constraints. They are not universal prohibitions: use the target's allocation, RTOS, ISR, test, and build policies.
 
 ```c
-/* ❌ 동적 메모리 할당 금지 */
-uint8_t *buf = malloc(256);   /* 힙 단편화, 실시간성 파괴, MISRA 위반 */
+/* If this project's policy forbids runtime allocation, do not allocate here. */
+uint8_t *buf = malloc(256);
 
-/* ✅ 정적 배열 사용 */
+/* Example alternative when a fixed capacity and lifetime are appropriate. */
 static uint8_t buf[256];
 ```
 
 ```c
-/* ❌ Ring Buffer 크기를 2의 거듭제곱이 아닌 값으로 설정 */
+/* Invalid only for the mask-based ring_buf implementation shown above. */
 uint8_t buf[100];
 ring_buf_init(&rb, buf, sizeof(buf));  /* HAL_ERR_PARAM 반환 */
 
-/* ✅ 2의 거듭제곱 */
+/* Valid capacity for that implementation. */
 uint8_t buf[128];  /* 64, 128, 256, 512 ... */
 ```
 
 ```c
-/* ❌ ISR에서 non-ISR FreeRTOS API 호출 */
+/* If this ISR calls FreeRTOS, use the documented FromISR API. */
 void IRQHandler(void) {
     xQueueSend(q, &msg, 0);  /* ISR에서 사용 금지 — 크래시 */
 }
 
-/* ✅ FromISR API 사용 */
+/* Example for FreeRTOS projects. */
 void IRQHandler(void) {
     BaseType_t woken = pdFALSE;
     xQueueSendFromISR(q, &msg, &woken);
@@ -466,28 +475,27 @@ void IRQHandler(void) {
 ```
 
 ```c
-/* ❌ 여러 테스트 파일을 하나의 실행파일로 컴파일 */
-/* setUp/tearDown 중복 정의 → 링크 에러 */
+/* Separate test executables are one way to avoid duplicate test hooks. */
 
-/* ✅ 각 테스트 파일은 독립 실행파일 */
+/* Example layout for Unity tests that define the same hooks. */
 add_executable(test_foo test_foo.c)
 add_executable(test_bar test_bar.c)
 ```
 
 ```c
-/* ❌ FreeRTOS 헤더 직접 include (MCU 환경에서만 존재) */
+/* A compatibility wrapper is optional; use it only if the project supports both host and FreeRTOS builds. */
 #include "FreeRTOS.h"   /* Host 빌드 시 컴파일 불가 */
 
-/* ✅ freertos_types.h 경유 (real/mock 자동 선택) */
+/* Example wrapper used by this reference project. */
 #include "freertos_types.h"
 ```
 
 ```c
-/* ❌ FreeRTOS API 호출 ISR에 높은 NVIC 우선순위 설정 (Cortex-M) */
+/* On Cortex-M FreeRTOS ports, check the configured syscall-priority ceiling before calling RTOS APIs from an ISR. */
 /* ISR 우선순위 < configMAX_SYSCALL_INTERRUPT_PRIORITY 시 하드폴트 */
 NVIC_SetPriority(USART1_IRQn, 0U);  /* 최고 우선순위 — FreeRTOS API 호출 불가 */
 
-/* ✅ configMAX_SYSCALL_INTERRUPT_PRIORITY 이하 우선순위 설정 */
+/* Example values only; priority encoding and port configuration are target-specific. */
 /* FreeRTOSConfig.h: #define configMAX_SYSCALL_INTERRUPT_PRIORITY  5 */
 NVIC_SetPriority(USART1_IRQn, 6U);  /* 5 이하(숫자 높을수록 낮은 우선순위) */
 ```

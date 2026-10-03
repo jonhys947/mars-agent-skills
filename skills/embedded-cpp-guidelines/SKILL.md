@@ -1,38 +1,42 @@
 ---
 name: embedded-cpp-guidelines
-description: C++17 embedded systems development guidelines. Pure virtual HAL interface abstraction, RAII resource management, lightweight handwritten Mock strategy without Google Mock macros, Google Test with CMake FetchContent, dependency injection, enum class type safety, noexcept patterns. Use when writing firmware, embedded drivers, HAL abstraction layers, MCU code, platform portability, unit testing embedded C++ code, or working with IGpio/IUart/ISpi/II2c interfaces.
-triggers:
-  - embedded C++
-  - C++ firmware
-  - HAL interface
-  - embedded HAL
-  - pure virtual embedded
-  - RAII embedded
-  - mock embedded
-  - IGpio
-  - IUart
-  - embedded unit test
-  - Google Test embedded
-  - CMake embedded
-  - STM32 C++
-  - MCU C++
+description: Embedded C++ guidance for firmware, drivers, resource ownership, and tests. The examples use C++17, virtual HALs, RAII, handwritten mocks, Google Test, and CMake; follow the active project's language version, architecture, build, allocation, and test conventions.
+metadata:
+  triggers:
+    - embedded C++
+    - C++ firmware
+    - HAL interface
+    - embedded HAL
+    - pure virtual embedded
+    - RAII embedded
+    - mock embedded
+    - IGpio
+    - IUart
+    - embedded unit test
+    - Google Test embedded
+    - CMake embedded
+    - STM32 C++
+    - MCU C++
 ---
 
 # Embedded C++ Guidelines
+
+## Scope and project fit
+
+The snippets mirror the upstream `base/cpp-embedded/` example, which is not bundled here. They illustrate one C++17/CMake/Google Test design; they do not require searching for that tree, upgrading a project's C++ standard, introducing CMake or a test dependency, adding a virtual HAL, or prohibiting allocation. First check the target's language/toolchain support, existing interfaces, resource lifecycle, allocator policy, and test runner. Apply only patterns that fit those constraints.
 
 ## 개요
 
 C++17 임베디드 시스템에서 **플랫폼 이식성 + 단위 테스트 가능성**을 동시에 확보하기 위한 핵심 패턴.
 하드웨어 없이 테스트 가능한 코드 구조를 목표로 한다.
 
-참조 베이스 코드: `base/cpp-embedded/`
+원본 예제 위치: `base/cpp-embedded/` (이 skill과 함께 제공되지는 않음)
 
 ---
 
-## 패턴 1 — 순수 가상 HAL 인터페이스
+## 예제 1 — 순수 가상 HAL 인터페이스
 
-**원칙:** 모든 하드웨어 접근은 순수 가상 인터페이스(Abstract Class)를 통한다.
-비즈니스 로직은 구체 구현이 아닌 인터페이스에만 의존한다 (DIP).
+**이 예제의 선택:** 하드웨어 접근을 순수 가상 인터페이스로 분리한다. Use this when the project benefits from runtime substitution or host-side tests and its ABI, code-size, and toolchain constraints permit virtual dispatch; a C API, templates, function table, or direct driver can be more suitable elsewhere.
 
 ```cpp
 // include/hal/IGpio.hpp
@@ -107,10 +111,9 @@ private:
 
 ---
 
-## 패턴 2 — RAII 리소스 관리
+## 예제 2 — RAII 리소스 관리
 
-**원칙:** 하드웨어 리소스(핀 상태, 버퍼, 락)는 생성자에서 초기화하고 소멸자에서 해제한다.
-예외 없는 임베디드 환경에서 리소스 누수를 방지하는 유일한 신뢰할 수 있는 방법.
+**이 예제의 선택:** RAII expresses ownership for resources whose lifetime matches an object. Initialize hardware explicitly when construction cannot report failure or the contract requires a later activation step; perform destructor cleanup only when the hardware's documented safe state and lifetime rules allow it.
 
 ```cpp
 // drivers/include/Led.hpp
@@ -188,18 +191,16 @@ hal::IGpio::Level Led::inactiveGpioLevel() const noexcept {
 } // namespace drivers
 ```
 
-**RAII 핵심 규칙:**
-- 드라이버 생성자: `init()` 호출 없이 생성자에서 즉시 초기화
-- 드라이버 소멸자: GPIO를 안전한 상태(Low 또는 Off)로 복원
-- 드라이버는 HAL 인터페이스를 **참조**로 받음 — 소유하지 않음 (수명 관리 분리)
-- 동적 할당 금지: `new` / `delete` 사용 금지, 정적 또는 스택 할당만 사용
+**Ownership notes for this example:**
+- The constructor initializes and the destructor turns the LED off only because this sample defines those lifecycle semantics; do not assume that every driver should touch hardware in a constructor or destructor.
+- The injected `hal::IGpio&` is non-owning, so its lifetime must exceed the `Led` object's lifetime.
+- Use the project's allocation policy. Static storage, stack storage, pools, and dynamic allocation each have constraints; choose based on boundedness, lifetime, concurrency, and failure handling rather than banning `new`/`delete` globally.
 
 ---
 
-## 패턴 3 — 경량 직접 작성 Mock 전략
+## 예제 3 — 경량 직접 작성 Mock 전략
 
-**원칙:** Google Mock(`MOCK_METHOD`, `EXPECT_CALL`) 대신 인터페이스를 직접 상속한 경량 Mock 클래스를 작성한다.
-호출 횟수와 마지막 값을 public 멤버로 추적하면 대부분의 임베디드 단위 테스트에 충분하다.
+This is one lightweight fake strategy for the interface shown above. Use the project's existing test doubles or framework when present; public counters are useful only when they expose the behavior a test needs to assert.
 
 ```cpp
 // mock/MockGpio.hpp
@@ -287,10 +288,9 @@ TEST(LedDriverTest, Toggle_ActiveLow) {
 
 ---
 
-## 패턴 4 — CMake + Google Test FetchContent
+## Optional host-test example — CMake + Google Test FetchContent
 
-**원칙:** Google Test를 FetchContent로 자동 다운로드하여 별도 설치 없이 빌드한다.
-`INTERFACE` 라이브러리로 헤더 전용 인터페이스를 노출하고, `STATIC` 라이브러리로 드라이버를 분리한다.
+This example uses CMake and Google Test for a host-side build. FetchContent downloads a dependency, so use it only when the repository permits network-fetched dependencies and this is its established build/test path; otherwise use the project's approved dependency and test setup.
 
 ```cmake
 # CMakeLists.txt (루트)
@@ -390,50 +390,51 @@ base/cpp-embedded/
 
 ---
 
-## 안티패턴
+## Sample project conventions to evaluate
+
+The table below describes choices made by the example scaffold, not universal embedded C++ rules. Follow the active project's coding standard, APIs, and constraints.
 
 | 안티패턴 | 올바른 패턴 |
 |---|---|
-| `new` / `delete` 사용 | 정적/스택 할당, RAII |
+| `new` / `delete` 사용 | Follow the project's allocator and ownership rules; use fixed or pooled storage when its memory/timing requirements call for it |
 | `HAL_GPIO_WritePin()` 직접 호출 | `IGpio::write()` 인터페이스 사용 |
 | 함수 내부에서 `Gpio gpio;` 생성 | 생성자 매개변수로 `hal::IGpio&` 주입 |
 | `int` 타입 GPIO 레벨 (`0`, `1`) | `enum class Level { Low, High }` |
 | Google Mock `MOCK_METHOD` 매크로 | 직접 작성 Mock 클래스 (교육적, 경량) |
-| `virtual` 소멸자 누락 | `virtual ~IBase() = default;` 필수 |
-| 예외(exception) 사용 | `noexcept` + 반환값으로 오류 전파 |
+| `virtual` 소멸자 누락 | If polymorphic deletion through a base pointer is supported, define the appropriate virtual destructor |
+| 예외(exception) 사용 | Follow the configured exception policy and project error convention; `noexcept` is a behavioral contract, not a universal replacement for exceptions |
 | `std::cout` 디버그 출력 | `Console` 드라이버 (`IUart` 기반) 사용 |
 | 플랫폼 헤더 비즈니스 로직에 포함 | HAL 인터페이스만 포함, 플랫폼 헤더 분리 |
 | `enum` (타입 미약) | `enum class : uint8_t` |
 
 ---
 
-## C++17 임베디드 핵심 키워드
+## C++ features shown in the example
+
+Use each feature only when the project's selected C++ standard, compiler/library, coding rules, and ABI support it.
 
 ```cpp
-// ── 필수 (모든 MCU 환경) ───────────────────────────────────────────────────
-[[nodiscard]]           // 반환값 무시 방지
-[[maybe_unused]]        // 파라미터 미사용 경고 억제
-noexcept                // 예외 없음 명시 (임베디드 필수)
-override                // 가상 함수 오버라이드 명시
-final                   // 더 이상 상속 금지 (Mock, 구체 구현)
-constexpr               // 컴파일 타임 상수
-if constexpr(...)       // 컴파일 타임 분기
+// ── C++11 features; use only if the selected standard/toolchain supports them ──
+noexcept                // Declares a non-throwing function; use when it matches the contract
+override                // Checks a virtual override
+final                   // Prevents further derivation/overriding
+constexpr               // Compile-time-capable declaration; exact rules vary by standard
 
-// ── 환경 확인 후 사용 (STL 지원 여부에 따라) ──────────────────────────────
-// Cortex-M0/M0+ + newlib-nano 환경은 STL 일부 미지원 → 프로젝트 빌드 설정 확인 필수
+// ── C++17 features; use only if the project enables C++17 ──────────────────
+[[nodiscard]]           // C++17 standard attribute
+[[maybe_unused]]        // C++17 standard attribute
+if constexpr(...)       // C++17 compile-time branch
+
+// ── Standard-library availability and behavior depend on the configured library ──
 std::array<T, N>        // 고정 크기 배열 (malloc 대안, 대부분 MCU 지원)
 std::optional<T>        // null 가능 반환값 (코드 크기 증가 가능)
 std::string_view        // 문자열 참조 (동적 할당 없음, 읽기 전용)
-// std::vector, std::string → 동적 할당 발생, 임베디드에서 원칙적 금지
+// std::vector and std::string allocation behavior depends on the type/operation/library;
+// check actual use and project memory policy instead of banning them by default.
 ```
 
-> **MCU 환경별 STL 사용 지침:**
-> - **Cortex-M3/M4/M7 + newlib 풀버전**: `std::array`, `std::optional`, `std::string_view` 사용 가능
-> - **Cortex-M0/M0+ + newlib-nano**: `std::array`만 안전. 나머지는 코드 크기/힙 확인 필요
-> - **AUTOSAR/MISRA 준수 프로젝트**: STL 완전 금지, 직접 구현 배열/옵셔널 사용
+> Check the exact C++ standard mode, standard library, compiler support, code-size and allocation characteristics, and any AUTOSAR/MISRA or project restrictions. MCU core family alone does not determine which library features are safe or available.
 
 ---
 
-**참조 코드:** `base/cpp-embedded/`
-**테스트 결과:** Google Test 43/43 PASSED (LedDriver 12 + MockUart 16 + MockGpio 15)
-**빌드 환경:** CMake 3.21+, C++17, GoogleTest v1.14.0 (FetchContent)
+**Original example:** `base/cpp-embedded/` (not bundled here). The CMake, C++17, and Google Test versions above describe that sample setup only; confirm actual support and test results in the target repository.

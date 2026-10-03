@@ -1,17 +1,23 @@
 # MARS Agent Skills
 
-Personal mirror of the Agent Skills used across MARS projects.
+Curated Agent Skills used across MARS projects, originally imported from the owner's local catalog.
 
 This repository is intentionally organized with each skill under `skills/<name>/SKILL.md`, so compatible skill installers can discover the catalog directly.
 
-## Sync the exact locally installed copies
+## Update the curated source
+
+Make reviewed changes in this repository first. Preserve each skill's upstream attribution and notices, adapt project-specific examples to their actual applicability, and keep `SKILLS.txt` and both plugin manifests consistent. Project contracts, hardware constraints, toolchains, authorization, and `AGENTS.md` take precedence over reusable skill guidance.
+
+Publishing source changes to GitHub and reimporting the plugin are separate operations. Reimport only when the owner authorizes it; a GitHub update does not update an already installed plugin.
+
+### Legacy local mirror synchronization
 
 The repository includes `scripts/sync-local-skills.ps1`, which copies the installed skills from:
 
 - `~/.agents/skills`
 - `~/.codex/skills`
 
-It excludes Codex built-in `.system` skills and standalone `.vibeskills` installer state, normalizes lowercase `skill.md` to `SKILL.md`, rebuilds `SKILLS.txt`, commits the result, and pushes it to `main`.
+It excludes Codex built-in `.system` skills and standalone `.vibeskills` installer state, normalizes lowercase `skill.md` to `SKILL.md`, rebuilds `SKILLS.txt`, commits the result, and pushes it to `main`. **It replaces the entire skill catalog. Do not run it with stale local copies: it can erase curated corrections and repository-only skills.** Compare and reconcile source changes first; use the script only when a complete local replacement is explicitly intended.
 
 Run from Windows PowerShell:
 
@@ -21,11 +27,11 @@ Invoke-WebRequest "https://raw.githubusercontent.com/jonhys947/mars-agent-skills
 powershell -ExecutionPolicy Bypass -File $tmp
 ```
 
-This is the canonical way to refresh the cloud mirror from the locally installed copies.
+This legacy script performs a complete mirror replacement; reviewed source edits are the normal update workflow.
 
 ## Install
 
-After the first local sync has populated `skills/`, install every skill globally:
+When installation is authorized, install every skill globally:
 
 ```powershell
 npx skills add https://github.com/jonhys947/mars-agent-skills --all -g -y
@@ -59,6 +65,7 @@ npx skills add https://github.com/jonhys947/mars-agent-skills --list
 
 ### Review / engineering workflow
 
+- `mars-orchestrator`
 - `code-review`
 - `karpathy-guidelines`
 - `revisao-pr`
@@ -90,7 +97,7 @@ The repository also mirrors the other skills present in the local global catalog
 
 ## Mirror policy
 
-- Files are copied from the locally installed skill directories supplied by the repository owner.
+- The initial catalog came from locally installed skill directories supplied by the repository owner. Subsequent adaptations are reviewed in this repository.
 - Codex built-in `.system` skills are intentionally **not mirrored**. They are runtime-provided system assets rather than user-installed skills.
 - Standalone `.vibeskills` installer state is not treated as a skill.
 - `http-error-diagnostics/skill.md` is normalized to `SKILL.md` for case-sensitive environments.
@@ -99,3 +106,9 @@ The repository also mirrors the other skills present in the local global catalog
 ## Project usage
 
 For MARS projects, do not load the whole catalog by default. Project `AGENTS.md` files should select only the skills applicable to the current target and task.
+
+Use `mars-orchestrator` when delegation or implementation supervision is authorized. It assigns ownership, checks the actual integration path for each requirement, and requires independent review and explicit evidence before claiming completion. Select agents and their model settings through the available runtime; skills do not configure models or create execution tools.
+
+### Validation limits
+
+Some imported skills retain client-specific frontmatter: `code-review-riscv` (`agent`, `context`, `disable-model-invocation`), `driver-review` (`disable-model-invocation`), `iconography-and-imagery` (`tags`), and `token-efficiency` (`autoload`). These existing fields are preserved rather than silently changing invocation behavior. The strict Codex skill-creator validator rejects those extensions; check compatibility with the intended installer separately. YAML parsing and static review do not prove installed runtime behavior. Reimport and runtime checks remain a separate authorized step.

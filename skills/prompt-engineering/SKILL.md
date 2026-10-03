@@ -1,17 +1,17 @@
 ---
 name: prompt-engineering
-description: Use this skill when you writing commands, hooks, skills for Agent, or prompts for sub agents or any other LLM interaction, including optimizing prompts, improving LLM outputs, or designing production prompt templates.
+description: Use when writing or improving prompts, agent instructions, commands, hooks, skills, or other LLM interactions.
 ---
 
 # Prompt Engineering Patterns
 
-Advanced prompt engineering techniques to maximize LLM performance, reliability, and controllability.
+Practical patterns for making prompts clear, bounded, and verifiable. A prompt can guide behavior, but it does not guarantee correctness; evaluate important prompts against representative inputs and observable outcomes.
 
 ## Core Capabilities
 
 ### 1. Few-Shot Learning
 
-Teach the model by showing examples instead of explaining rules. Include 2-5 input-output pairs that demonstrate the desired behavior. Use when you need consistent formatting, specific reasoning patterns, or handling of edge cases. More examples improve accuracy but consume tokens—balance based on task complexity.
+Show examples when they clarify the desired output or an important edge case. Use only as many as the task needs; examples that are irrelevant or contradictory can make a prompt less clear.
 
 **Example:**
 
@@ -27,28 +27,27 @@ Output: {"issue": "feature_request", "error_code": null, "priority": "low"}
 Now process: "Can't upload files larger than 10MB, getting timeout"
 ```
 
-### 2. Chain-of-Thought Prompting
+### 2. Ask for Observable Rationale and Evidence
 
-Request step-by-step reasoning before the final answer. Add "Let's think step by step" (zero-shot) or include example reasoning traces (few-shot). Use for complex problems requiring multi-step logic, mathematical reasoning, or when you need to verify the model's thought process. Improves accuracy on analytical tasks by 30-50%.
+Do not request hidden chain-of-thought or private reasoning traces. When a task needs explanation, ask for a concise, checkable summary: the decision, material assumptions, evidence or sources, verification performed, uncertainty, and unresolved issues. Specify observable acceptance criteria rather than requiring a particular internal reasoning process.
 
 **Example:**
 
 ```markdown
 Analyze this bug report and determine root cause.
 
-Think step by step:
-1. What is the expected behavior?
-2. What is the actual behavior?
-3. What changed recently that could cause this?
-4. What components are involved?
-5. What is the most likely root cause?
+Provide a concise diagnosis with:
+1. Expected and observed behavior
+2. Relevant changes or evidence found
+3. Likely cause and uncertainty
+4. A check that would confirm or disprove the cause
 
 Bug: "Users can't save drafts after the cache update deployed yesterday"
 ```
 
 ### 3. Prompt Optimization
 
-Systematically improve prompts through testing and refinement. Start simple, measure performance (accuracy, consistency, token usage), then iterate. Test on diverse inputs including edge cases. Use A/B testing to compare variations. Critical for production prompts where consistency and cost matter.
+Improve prompts through task-specific evaluation. Start simple, define observable success measures, and evaluate on representative inputs and edge cases. Compare variants only when results can be measured meaningfully; do not infer a general performance gain from a small or unrepresentative sample.
 
 **Example:**
 
@@ -126,7 +125,7 @@ Start with simple prompts, add complexity only when needed:
    - "Summarize this article in 3 bullet points, focusing on key findings"
 
 3. **Level 3**: Add reasoning
-   - "Read this article, identify the main findings, then summarize in 3 bullet points"
+   - "Summarize the article in 3 bullet points and cite the passages supporting each point"
 
 4. **Level 4**: Add examples
    - Include 2-3 example summaries with input-output pairs
@@ -142,7 +141,7 @@ Start with simple prompts, add complexity only when needed:
 Build prompts that gracefully handle failures:
 
 - Include fallback instructions
-- Request confidence scores
+- Ask for uncertainty and its basis; avoid numeric confidence scores unless they are calibrated and useful for the task
 - Ask for alternative interpretations when uncertain
 - Specify how to indicate missing information
 
@@ -215,7 +214,7 @@ If verification fails, revise your response."""
 
 # Agent Prompting Best Practices
 
-Based on Anthropic's official best practices for agent prompting.
+Provider-agnostic patterns for agent prompts.
 
 ## Core principles
 
@@ -223,28 +222,24 @@ Based on Anthropic's official best practices for agent prompting.
 
 The “context window” refers to the entirety of the amount of text a language model can look back on and reference when generating new text plus the new text it generates. This is different from the large corpus of data the language model was trained on, and instead represents a “working memory” for the model. A larger context window allows the model to understand and respond to more complex and lengthy prompts, while a smaller context window may limit the model’s ability to handle longer prompts or maintain coherence over extended conversations.
 
-- Progressive token accumulation: As the conversation advances through turns, each user message and assistant response accumulates within the context window. Previous turns are preserved completely.
-- Linear growth pattern: The context usage grows linearly with each turn, with previous turns preserved completely.
-- 200K token capacity: The total available context window (200,000 tokens) represents the maximum capacity for storing conversation history and generating new output from Claude.
-- Input-output flow: Each turn consists of:
-  - Input phase: Contains all previous conversation history plus the current user message
-  - Output phase: Generates a text response that becomes part of a future input
+- The usable context is bounded by the model and serving system. Earlier messages or files may be unavailable, truncated, or summarized; do not assume complete history or a fixed capacity.
+- Put essential requirements in the active prompt or an authoritative project artifact, and verify important facts from their source.
 
 ### Concise is key
 
-The context window is a public good. Your prompt, command, skill shares the context window with everything else Claude needs to know, including:
+Available context is shared among instructions, conversation, tools, and task data. Keep prompts focused and include task-specific facts that are not reliably available elsewhere:
 
 - The system prompt
 - Conversation history
 - Other commands, skills, hooks, metadata
 - Your actual request
 
-**Default assumption**: Claude is already very smart
+**Default assumption**: the model can handle ordinary instructions, but may not know private project facts or have access to a named tool.
 
-Only add context Claude doesn't already have. Challenge each piece of information:
+Challenge each piece of information:
 
-- "Does Claude really need this explanation?"
-- "Can I assume Claude knows this?"
+- "Does the model need this explanation for this task?"
+- "Is this fact available from the task context or an accessible source?"
 - "Does this paragraph justify its token cost?"
 
 **Good example: Concise** (approximately 50 tokens):
@@ -274,7 +269,7 @@ recommend pdfplumber because it's easy to use and handles most cases well.
 First, you'll need to install it using pip. Then you can use the code below...
 ```
 
-The concise version assumes Claude knows what PDFs are and how libraries work.
+The concise version leaves out background the task does not need while keeping the concrete operation.
 
 ### Set appropriate degrees of freedom
 
@@ -344,216 +339,22 @@ python scripts/migrate.py --verify --backup
 Do not modify the command or add additional flags.
 ````
 
-**Analogy**: Think of Claude as a robot exploring a path:
+**Analogy**: Think of the task as a path with varying constraints:
 
 - **Narrow bridge with cliffs on both sides**: There's only one safe way forward. Provide specific guardrails and exact instructions (low freedom). Example: database migrations that must run in exact sequence.
-- **Open field with no hazards**: Many paths lead to success. Give general direction and trust Claude to find the best route (high freedom). Example: code reviews where context determines the best approach.
+- **Open field with no hazards**: Many paths lead to success. Give general direction and allow the model to use evidence and project conventions (high freedom). Example: code reviews where context determines the best approach.
 
-# Persuasion Principles for Agent Communication
+# Clear and Trustworthy Instructions
 
-Usefull for writing prompts, including but not limited to: commands, hooks, skills for Claude Code, or prompts for sub agents or any other LLM interaction.
+State the actual requirement, its source or scope, and observable success criteria. Use emphatic language only for genuine requirements; do not add false urgency, social pressure, forced choices, or announcements as a substitute for a clear task contract.
 
-## Overview
-
-LLMs respond to the same persuasion principles as humans. Understanding this psychology helps you design more effective skills - not to manipulate, but to ensure critical practices are followed even under pressure.
-
-**Research foundation:** Meincke et al. (2025) tested 7 persuasion principles with N=28,000 AI conversations. Persuasion techniques more than doubled compliance rates (33% → 72%, p < .001).
-
-## The Seven Principles
-
-### 1. Authority
-
-**What it is:** Deference to expertise, credentials, or official sources.
-
-**How it works in prompts:**
-
-- Imperative language: "YOU MUST", "Never", "Always"
-- Non-negotiable framing: "No exceptions"
-- Eliminates decision fatigue and rationalization
-
-**When to use:**
-
-- Discipline-enforcing skills (TDD, verification requirements)
-- Safety-critical practices
-- Established best practices
-
-**Example:**
-
-```markdown
-✅ Write code before test? Delete it. Start over. No exceptions.
-❌ Consider writing tests first when feasible.
-```
-
-### 2. Commitment
-
-**What it is:** Consistency with prior actions, statements, or public declarations.
-
-**How it works in prompts:**
-
-- Require announcements: "Announce skill usage"
-- Force explicit choices: "Choose A, B, or C"
-- Use tracking: TodoWrite for checklists
-
-**When to use:**
-
-- Ensuring skills are actually followed
-- Multi-step processes
-- Accountability mechanisms
-
-**Example:**
-
-```markdown
-✅ When you find a skill, you MUST announce: "I'm using [Skill Name]"
-❌ Consider letting your partner know which skill you're using.
-```
-
-### 3. Scarcity
-
-**What it is:** Urgency from time limits or limited availability.
-
-**How it works in prompts:**
-
-- Time-bound requirements: "Before proceeding"
-- Sequential dependencies: "Immediately after X"
-- Prevents procrastination
-
-**When to use:**
-
-- Immediate verification requirements
-- Time-sensitive workflows
-- Preventing "I'll do it later"
-
-**Example:**
-
-```markdown
-✅ After completing a task, IMMEDIATELY request code review before proceeding.
-❌ You can review code when convenient.
-```
-
-### 4. Social Proof
-
-**What it is:** Conformity to what others do or what's considered normal.
-
-**How it works in prompts:**
-
-- Universal patterns: "Every time", "Always"
-- Failure modes: "X without Y = failure"
-- Establishes norms
-
-**When to use:**
-
-- Documenting universal practices
-- Warning about common failures
-- Reinforcing standards
-
-**Example:**
-
-```markdown
-✅ Checklists without TodoWrite tracking = steps get skipped. Every time.
-❌ Some people find TodoWrite helpful for checklists.
-```
-
-### 5. Unity
-
-**What it is:** Shared identity, "we-ness", in-group belonging.
-
-**How it works in prompts:**
-
-- Collaborative language: "our codebase", "we're colleagues"
-- Shared goals: "we both want quality"
-
-**When to use:**
-
-- Collaborative workflows
-- Establishing team culture
-- Non-hierarchical practices
-
-**Example:**
-
-```markdown
-✅ We're colleagues working together. I need your honest technical judgment.
-❌ You should probably tell me if I'm wrong.
-```
-
-### 6. Reciprocity
-
-**What it is:** Obligation to return benefits received.
-
-**How it works:**
-
-- Use sparingly - can feel manipulative
-- Rarely needed in prompts
-
-**When to avoid:**
-
-- Almost always (other principles more effective)
-
-### 7. Liking
-
-**What it is:** Preference for cooperating with those we like.
-
-**How it works:**
-
-- **DON'T USE for compliance**
-- Conflicts with honest feedback culture
-- Creates sycophancy
-
-**When to avoid:**
-
-- Always for discipline enforcement
-
-## Principle Combinations by Prompt Type
-
-| Prompt Type | Use | Avoid |
-|------------|-----|-------|
-| Discipline-enforcing | Authority + Commitment + Social Proof | Liking, Reciprocity |
-| Guidance/technique | Moderate Authority + Unity | Heavy authority |
-| Collaborative | Unity + Commitment | Authority, Liking |
-| Reference | Clarity only | All persuasion |
-
-## Why This Works: The Psychology
-
-**Bright-line rules reduce rationalization:**
-
-- "YOU MUST" removes decision fatigue
-- Absolute language eliminates "is this an exception?" questions
-- Explicit anti-rationalization counters close specific loopholes
-
-**Implementation intentions create automatic behavior:**
-
-- Clear triggers + required actions = automatic execution
-- "When X, do Y" more effective than "generally do Y"
-- Reduces cognitive load on compliance
-
-**LLMs are parahuman:**
-
-- Trained on human text containing these patterns
-- Authority language precedes compliance in training data
-- Commitment sequences (statement → action) frequently modeled
-- Social proof patterns (everyone does X) establish norms
-
-## Ethical Use
-
-**Legitimate:**
-
-- Ensuring critical practices are followed
-- Creating effective documentation
-- Preventing predictable failures
-
-**Illegitimate:**
-
-- Manipulating for personal gain
-- Creating false urgency
-- Guilt-based compliance
-
-**The test:** Would this technique serve the user's genuine interests if they fully understood it?
+For multi-step work, name real dependencies and the checks that matter. Request an external approval only when the task, user, or governing workflow actually requires one. Ask for a concise explanation of decisions and evidence when useful, not private reasoning traces.
 
 ## Quick Reference
 
 When designing a prompt, ask:
 
-1. **What type is it?** (Discipline vs. guidance vs. reference)
-2. **What behavior am I trying to change?**
-3. **Which principle(s) apply?** (Usually authority + commitment for discipline)
-4. **Am I combining too many?** (Don't use all seven)
-5. **Is this ethical?** (Serves user's genuine interests?)
+1. **What outcome should the prompt produce?**
+2. **Which facts, tools, and constraints are actually available?**
+3. **What observable criteria show success or failure?**
+4. **What uncertainty should be surfaced instead of guessed?**

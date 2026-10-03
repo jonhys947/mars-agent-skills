@@ -56,4 +56,6 @@ This file records the known origin of the copies mirrored in this repository. Th
 
 ## Updating
 
+`mars-orchestrator` is a MARS-authored skill for supervised implementation. The other source entries remain the origins of imported content; targeted MARS adaptations do not change upstream ownership or license terms.
+
 When refreshing a mirrored skill, compare the local installed copy with its upstream source and preserve any upstream license/notice files that are part of the distributed skill.

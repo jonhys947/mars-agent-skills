@@ -9,21 +9,23 @@ description: Comprehensive testing standards including unit, integration, proper
 
 Establish consistent testing practices across all codebases. Ensure tests are reliable, maintainable, and provide meaningful coverage.
 
-## Testing Pyramid
+## Choosing Test Scope
 
 ```
         /\
-       /E2E\         <- Few (5-10%)
+       /E2E\         <- Use for critical end-to-end behavior
       /------\
-     /Integration\   <- Some (20-30%)
+     /Integration\   <- Use at important component boundaries
     /------------\
-   /    Unit      \  <- Many (60-75%)
+   /    Unit      \  <- Use for focused logic and edge cases
   /----------------\
 ```
 
-## Pre-Approved Testing Libraries
+This is a selection aid, not a quota. Choose tests from the behavior, failure modes, integration boundaries, and verification gates relevant to the task. Follow project-specific requirements when they exist.
 
-These libraries are pre-vetted and can be installed autonomously:
+## Test Tools and Dependencies
+
+Prefer the test framework and utilities already used by the project. The libraries below are examples, not blanket approval to install them. Add a dependency only when the task and the project's dependency policy authorize it; otherwise use the existing toolchain or report the limitation.
 
 ### JavaScript/TypeScript
 - `fast-check` - Property-based testing
@@ -102,11 +104,9 @@ const testUser = {
 
 **Exception**: Use generators for property-based tests only.
 
-### Coverage Requirements
+### Coverage and Risk
 
-- **Minimum**: 80% line coverage
-- **Target**: 90% line coverage
-- **Critical paths**: 100% coverage (auth, payments, security)
+There is no universal line-coverage percentage. Follow explicit project gates or user requirements. Use coverage reports to find untested behavior, then prioritize concrete risks such as authorization boundaries, data loss, state transitions, input validation, and failure recovery. Do not treat a percentage alone as evidence that behavior is correct.
 
 ### What to Test
 
@@ -127,17 +127,12 @@ const testUser = {
 
 ### When to Use PBT
 
-**REQUIRED for:**
-1. **Data Transformation**: Parsers, converters, serializers
-2. **Math/Financial Logic**: Calculations, billing, scoring
-3. **Cryptography/Security**: Hashing, encryption, sanitization
-4. **Sorting/Filtering**: Algorithms with invariants
+**Consider PBT for:**
+- Parsers, converters, serializers, and other transformations with broad input spaces
+- Calculations and algorithms with precise invariants
+- Security-sensitive logic when the property is meaningful and the existing tools support it
 
-**NOT NEEDED for:**
-- Simple CRUD operations
-- UI rendering
-- Configuration loading
-- Logging
+PBT is optional. A conventional example-based test may be clearer or sufficient; choose based on the risk and observable contract rather than the category alone.
 
 ### PBT Patterns
 
@@ -189,7 +184,7 @@ test('balance never goes negative', () => {
 
 1. **Start simple**: Begin with basic properties
 2. **Use shrinking**: Let the framework find minimal failing cases
-3. **Set iteration count**: 100-1000 iterations (default is usually fine)
+3. **Set iteration count**: Use the project's configuration and runtime budget; preserve or report any relevant seed and failing case.
 4. **Document properties**: Explain what invariant you're testing
 5. **Combine with unit tests**: PBT complements, doesn't replace unit tests
 
@@ -371,16 +366,11 @@ func (m *MockRepo) FindByID(id string) (*User, error) {
 
 ## Test Complexity
 
-Tests should be simpler than the code they test:
-- **Cyclomatic Complexity**: ≤5 (vs ≤10 for production code)
-- **Cognitive Complexity**: ≤15 (vs ≤30 for production code)
-- **Function Length**: ≤30 lines (vs ≤60 for production code)
-
-If a test is complex, the code is probably too complex.
+Keep tests direct enough that the assertion and failure are easy to understand. Split setup or scenarios when that improves readability, but do not apply universal complexity or line-count thresholds. A complicated test can indicate unclear test setup, production behavior, or both; inspect the specific cause.
 
 ## Continuous Integration
 
-### CI Test Strategy
+Use the repository's CI workflow and required gates. The following is an illustrative shape, not a required job matrix or command set:
 
 ```yaml
 # Example: GitHub Actions
@@ -405,12 +395,9 @@ test:
       - run: npm run test:e2e
 ```
 
-### Test Execution Order
+### Local Verification Order
 
-1. **Linting**: Fast feedback on style issues
-2. **Unit tests**: Fast, run on every commit
-3. **Integration tests**: Slower, run on PR
-4. **E2E tests**: Slowest, run before merge
+Run focused checks first, then the broader project-defined gates that apply to the change. Do not claim a CI result unless it is confirmed for the relevant revision.
 
 ## Common Pitfalls
 
@@ -428,17 +415,11 @@ test:
 
 | Test Type | Speed | Scope | When to Use |
 |-----------|-------|-------|-------------|
-| Unit | Fast (ms) | Single function | Always |
+| Unit | Fast (ms) | Single function | Focused logic and edge cases where useful |
 | Integration | Medium (seconds) | Multiple components | API/DB interactions |
 | Property-Based | Medium (seconds) | Single function | Data transformation, math |
 | E2E | Slow (minutes) | Full system | Critical user flows |
 
 ## Integration with Agents
 
-**QA Engineer**: Primary user of this skill. Can autonomously install pre-approved testing libraries.
-
-**System/UI Engineers**: Reference when writing tests alongside implementation.
-
-**Validator**: Uses coverage and test execution results to verify quality.
-
-**Tech Lead**: Determines test strategy (unit vs property-based) in task delegation.
+Use this guidance in whichever roles the project defines. Tool or dependency installation, coverage gates, and test ownership follow the user's instructions and project policy; this skill does not grant installation authority.

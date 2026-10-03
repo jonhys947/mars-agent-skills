@@ -1,21 +1,20 @@
 ---
 name: driver-review
-description: Review and implement hardware driver code — DMA safety, interrupt correctness, timing constraints, peripheral register usage, channel drivers, and peripheral mock implementations. Use when writing, modifying, or reviewing LED drivers, SPI/I2S/RMT/UART/PARLIO/LCD_CAM peripherals, GPIO configuration, or peripheral mock code.
+description: Review or implement embedded hardware drivers for DMA, interrupts, timing, peripheral registers, and test doubles. Use when changing or reviewing MCU drivers; apply FastLED channel-engine examples only in repositories that use FastLED.
 disable-model-invocation: true
 ---
 
 # Hardware Driver Review & Implementation Guide
 
-Review and implement hardware driver code changes for embedded-specific safety and correctness issues.
+Use the general safety checks with the active project's hardware contract, APIs, and toolchain. The implementation examples and named `fl` types below come from FastLED; apply them only when the target repository uses FastLED, and never introduce them into another project by default.
 
 ## Your Task
 
-1. Run `git diff --cached` and `git diff` to see all changes
+1. For review or implementation in a Git repository, inspect the relevant staged and unstaged diff without discarding user changes
 2. Identify files that are hardware driver code (see "What Counts as Driver Code" below)
-3. For **reviews**: Check ALL driver code changes against the Review Rules below
-4. For **implementations**: Follow the Implementation Guide below
-5. Fix straightforward violations directly
-6. Report summary of all findings
+3. For **reviews**: Check relevant driver changes against the rules below and report findings; change reviewed code only when the user asks for fixes
+4. For **implementations**: Follow the requested scope and use applicable FastLED patterns below
+5. Report the summary and evidence
 
 ## What Counts as Driver Code
 
@@ -30,23 +29,19 @@ Files matching these patterns:
 # Part 1: Review Rules
 
 ### 1. DMA Safety
-- [ ] DMA buffers allocated with `MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA`
-- [ ] DMA buffers are 4-byte aligned (use `__attribute__((aligned(4)))` or aligned allocator)
-- [ ] No stack-allocated DMA buffers (must be heap or static)
-- [ ] DMA descriptors in internal SRAM (not PSRAM/SPIRAM)
-- [ ] Cache coherence handled: `esp_cache_msync()` or non-cacheable memory for DMA
-- [ ] DMA transfer size within hardware limits
-- [ ] Buffer lifetime extends beyond DMA completion (no use-after-free)
+- [ ] Check the selected chip, peripheral, driver API, and build configuration for required memory region, alignment, cache maintenance, and transfer-size limits. Do not assume ESP-IDF heap capabilities or a fixed alignment across FastLED targets.
+- [ ] Keep the buffer and descriptors valid for the full transfer; use static or allocated storage when an asynchronous transfer outlives the call that starts it.
+- [ ] Verify ownership and cleanup on success, error, cancellation, and timeout paths.
 
 ### 2. Interrupt Safety
-- [ ] ISR functions marked with `IRAM_ATTR` (ESP32) or proper section attributes
-- [ ] No heap allocation (`malloc`, `new`, `fl::vector`) inside ISRs
-- [ ] No mutex/semaphore take with blocking timeout in ISRs (use `portMAX_DELAY` = 0 only)
-- [ ] No `printf`, `FL_DBG`, `FL_WARN`, or logging in ISRs
-- [ ] No flash access from ISRs (all ISR code and data in IRAM/DRAM)
-- [ ] ISR-safe queue operations only (`xQueueSendFromISR`, not `xQueueSend`)
-- [ ] Critical sections use proper primitives (`portENTER_CRITICAL_ISR` not `portENTER_CRITICAL`)
-- [ ] ISR handlers return correct value (`true` if higher-priority task woken)
+- [ ] Use the platform's ISR placement attributes only as required by the target and interrupt configuration. On ESP32, cache-off handlers need the complete reachable code and data in accessible memory; `IRAM_ATTR` alone does not guarantee that.
+- [ ] Avoid allocation in ISRs unless the target's documented ISR-safe allocator explicitly permits it; prefer preallocated state
+- [ ] Do not block in an ISR. Use the platform's ISR-safe signaling APIs; never pass a blocking timeout from interrupt context. `portMAX_DELAY` is not a zero-timeout value.
+- [ ] Avoid logging or formatted I/O in ISRs unless the platform documents a safe, bounded ISR logging path
+- [ ] Check whether this interrupt can run while flash cache is unavailable; keep all reachable code/data accessible then if required by the target.
+- [ ] If the project uses FreeRTOS, use the matching `FromISR` APIs and respect the configured interrupt-priority ceiling.
+- [ ] Use the platform's documented interrupt-context critical-section primitive when one is needed; do not substitute a task-context lock or API without confirming it is ISR-safe
+- [ ] Follow the selected platform's ISR return and yield conventions.
 
 ### 3. Peripheral Register Access
 - [ ] Registers accessed through volatile pointers or HAL functions
@@ -56,29 +51,32 @@ Files matching these patterns:
 - [ ] GPIO matrix/IOMUX configured correctly for peripheral signals
 
 ### 4. Timing Constraints
-- [ ] SPI/I2S/RMT clock calculations match LED protocol requirements
-- [ ] Reset timing meets protocol minimums (WS2812: >280us, SK6812: >80us)
+- [ ] For LED protocols in scope, compare clock and reset timing against the current protocol specification and the selected peripheral's timing limits; do not reuse one chipset's values for another.
 - [ ] No blocking waits in time-critical paths
-- [ ] Watchdog fed in long-running operations
-- [ ] `vTaskDelay(1)` or `yield()` in busy loops to prevent watchdog reset
+- [ ] Long-running work obeys the configured watchdog and scheduling policy; use the project's supported yield or timeout mechanism where appropriate.
 
 ### 5. Memory Safety
 - [ ] Buffer sizes checked before DMA transfer setup
 - [ ] No buffer overflows in encoding functions (bounds checking on output buffer)
-- [ ] Encoding output size calculated correctly (e.g., wave8: 8 SPI bits per LED bit)
-- [ ] Chunk sizes aligned to hardware requirements (SPI: 4-byte aligned)
+- [ ] Calculate encoded output size from the selected representation (the `wave8` example applies only where that FastLED encoder is used)
+- [ ] Align chunk sizes to the selected peripheral/API requirements; do not assume a universal SPI alignment
 
-### 6. Channel Engine Patterns (FastLED-specific)
+### 6. FastLED Channel Engine Patterns (conditional)
+
+Apply this section only to a FastLED channel-engine change; state names and APIs are FastLED-specific.
 - [ ] `show()` waits for `poll() == READY` before starting new frame
 - [ ] No branching on intermediate states (DRAINING, STREAMING) in wait loops
 - [ ] Channel released after transmission complete (frees peripheral for next channel)
 - [ ] State machine handles all transitions (no stuck states)
 - [ ] Error recovery path exists (timeout, reset to IDLE)
 
-### 7. Peripheral Mock Rules (CRITICAL)
+### 7. FastLED Peripheral Mock Example (conditional)
+
+Apply these conventions only to FastLED mocks whose existing test contract uses this synchronous simulation model. For another driver or an asynchronous interface, model the documented completion, cancellation, timing, and concurrency behavior of that API instead; do not require these names or a singleton mock.
+
 - [ ] **NO background threads** — mock must be fully synchronous
-- [ ] **NO wall-clock timing** (`fl::micros()`, `sleep_for`) — use `mSimulatedTimeUs`
-- [ ] **NO mutex/condition_variable** — single-threaded, no synchronization needed
+- [ ] Avoid wall-clock sleeps in deterministic unit tests; use the test framework's virtual time or controlled completion mechanism when available
+- [ ] Avoid synchronization primitives when the mock and test are intentionally single-threaded; preserve them when concurrent behavior is part of the contract
 - [ ] Synchronous callback pump via `pumpDeferredCallbacks()` with re-entrancy guard
 - [ ] `waitDone()` returns instantly — never polls or sleeps
 - [ ] `reset()` clears ALL state — called between test cases for isolation
@@ -86,16 +84,15 @@ Files matching these patterns:
 - [ ] Singleton via `fl::Singleton<Impl>`
 
 ### 8. Power and Reset
-- [ ] Brown-out detection configured if needed
-- [ ] Peripheral reset on initialization (clean state)
-- [ ] GPIO pins set to safe state on driver teardown
-- [ ] Power domains managed correctly (light sleep compatibility)
+- [ ] Check brown-out handling only where the selected chip and product requirements need it
+- [ ] Reset peripherals and drive pins to safe states only when required by their datasheets, board bindings, and the existing lifecycle contract
+- [ ] Respect documented power-domain and light-sleep constraints; do not add reset, GPIO, or sleep behavior without an authorized hardware binding
 
 ### 9. Multi-Platform Considerations
-- [ ] Platform guards (`#ifdef ESP32`, `#ifdef FL_IS_ARM`) correct and complete
+- [ ] Platform guards use the project's actual compiler and target macros; examples such as `ESP32` or `FL_IS_ARM` are not portable names
 - [ ] No platform-specific types leaking into shared headers
 - [ ] Fallback/no-op implementations for unsupported platforms
-- [ ] Integer types match platform expectations (see `src/platforms/*/int.h`)
+- [ ] Integer types match the project's conventions and the target ABI
 
 ---
 
@@ -133,13 +130,13 @@ tests/platforms/esp/32/drivers/foo/
 - LCD_CAM: `src/platforms/esp/32/drivers/lcd_cam/`
 - PARLIO: `src/platforms/esp/32/drivers/parlio/`
 
-## Peripheral Interface
+## FastLED Peripheral Interface Example (conditional)
 
 Define the virtual interface in `ifoo_peripheral.h`:
 
 - **No ESP-IDF types** — use `void*`, `u16*`, basic types only
 - All methods `FL_NOEXCEPT override`
-- Buffer management with 64-byte alignment (DMA requirement)
+- Buffer management follows the selected peripheral's documented memory-region and alignment requirements; do not hardcode 64-byte alignment
 - Time simulation: `getMicroseconds()`, `delay(ms)`
 - Callback registration: `registerCallback(void* fn, void* ctx)`
 
@@ -311,7 +308,7 @@ FL_TEST_CASE("FooPeripheralMock - basic transmit") {
 }
 ```
 
-## Driver Registration Priority
+## FastLED Driver Registration Priority (conditional)
 
 In `channel_manager_esp32.cpp.hpp`:
 - PARLIO: 4 (highest)
@@ -321,26 +318,9 @@ In `channel_manager_esp32.cpp.hpp`:
 - SPI: 0
 - UART: -1
 
-## Buffer Alignment (64-byte for DMA)
+## Buffer Alignment and Allocation
 
-```cpp
-u16* allocateBuffer(size_t size_bytes) {
-    size_t aligned = ((size_bytes + 63) / 64) * 64;
-#ifdef FL_IS_WIN
-    return static_cast<u16*>(_aligned_malloc(aligned, 64));
-#else
-    return static_cast<u16*>(aligned_alloc(64, aligned));
-#endif
-}
-void freeBuffer(u16* buffer) {
-    if (!buffer) return;
-#ifdef FL_IS_WIN
-    _aligned_free(buffer);
-#else
-    fl::free(buffer);
-#endif
-}
-```
+Determine alignment, addressability, cache-coherency, transfer-length, and lifetime constraints from the active FastLED platform driver and target documentation. Use the allocator or declaration pattern supported by that target. The FastLED examples above use `fl` types because they belong to that codebase; they are not APIs to introduce into other projects.
 
 ---
 
@@ -367,7 +347,7 @@ void freeBuffer(u16* buffer) {
 ## Instructions
 - Focus on driver/platform code — skip application-level changes
 - Be thorough on DMA and interrupt safety (these cause hard-to-debug crashes)
-- **Mock violations are P0** — async mocks with threads/wall-clock = flaky tests
-- Reference `agents/docs/cpp-standards.md` for general C++ rules
-- Make corrections directly when safe
-- Ask for user confirmation on significant changes
+- Assess mock findings by the reproduced behavior and consequence: for example, whether the test is nondeterministic, hides an async completion race, or disagrees with the driver contract. Assign a priority only with evidence and the project's severity scheme.
+- Follow the project's C++ standard and style guidance when present; a FastLED reference such as `agents/docs/cpp-standards.md` may not exist in another repository
+- For implementation requests, make in-scope changes directly and describe material tradeoffs; do not seek routine confirmation for significant work the user already requested
+- Ask only when a genuine contract or scope ambiguity blocks safe progress, or an additional gated action lacks authorization

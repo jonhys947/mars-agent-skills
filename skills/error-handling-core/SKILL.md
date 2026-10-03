@@ -1,97 +1,35 @@
 ---
 name: error-handling-core
-description: Core error handling protocol for hybrid AI-human logging. Load language-specific skills separately.
+description: Language-agnostic error handling guidance. Load language-specific skills separately when relevant.
 ---
 
-# SKILL: Hybrid AI-Human Logging & Error Architecture
+# Error Handling Core
 
 ## Objective
 
-Generate log outputs that serve two distinct consumers:
-1. **Humans:** Verbose, natural language context for debugging
-2. **AI Agents:** Deterministic, strongly-typed signals for instant graph retrieval
+Handle failures so callers can make the right decision and maintainers can diagnose them. Follow the repository's existing error types, logging, tracing, and observability conventions. Do not add a parallel error or logging protocol just for an agent.
 
-## The Protocol: Dual-Channel Logging
+## Error Representation
 
-Every significant log event emits two signals.
+Use the language's normal error mechanism first. Add a domain error type or stable code only when the application contract or a caller needs to distinguish that failure. Reuse established types where possible; do not create a dedicated type for every message or code.
 
-### AI Channel Format
+Preserve the original cause and useful operation context when wrapping an error. Avoid including secrets or unnecessary personal data in messages and fields.
 
-```
-ai:<LEVEL> <CODE> [<KEY>=<VALUE>]...
-```
+## Logging and Recovery
 
-**Examples:**
-```
-ai:ERROR E-156
-ai:WARN E-042 retry_count=3 backoff_ms=1000
-ai:INFO CHECKPOINT state=authenticated user_id=12345
-```
+- Use the project's configured logger or tracing system and its structured fields where available. A normal log entry is sufficient; do not require duplicate "AI" and human channels.
+- Handle or report an error at the layer that can take action. Avoid logging the same error at every layer as it propagates.
+- Choose severity and retry behavior from the application's policy and the failure context. A warning does not automatically mean retry, and an error does not automatically mean fatal.
+- Keep remediation, retries, and recovery explicit in the owning application flow. Merely classifying an error must not trigger a side effect.
 
-**Constraint:** Error codes must map to defined type symbols (Class/Struct) in the codebase.
+## Finding Error Context
 
-### Human Channel Format
+Start with the evidence available in the repository: call sites, existing logs, tests, traces, and documented behavior. Use code search, IDE indexes, or a code graph only when that tool is already available and its supported interface is known. Do not assume a graph database, schema, query language, or external service exists.
 
-Standard natural language logging with timestamps:
-```
-2024-02-01T10:00:00Z ERROR Connection refused: timeout after 30s (host=db.example.com)
-```
-
-## Type-Driven Errors
-
-### The "Class-per-Error" Rule
-
-Every unique AI error code must exist as a dedicated type in the codebase.
-
-**Bad:** `logger.error("E-156: Token expired")` (String Literal)  
-**Good:** `logger.error(new Error156())` (Typed Symbol)
-
-### Why This Matters for AI
-
-When AI reads `ai:ERROR E-156`:
-1. **Symbol Lookup:** Maps `E-156` to struct/class `Error156`
-2. **Graph Traversal:** Queries Code Property Graph for node `Error156`
-3. **Instant Context:** Reveals definition, usage sites, remediation actions
-
-### Naming Convention
-
-* **Log Output:** `ai:ERROR E-156`
-* **Type Name:** `Error156` or `Error156ConnectionRefused`
-* **File Path:** `errors/network/error156.go` or `src/errors/network/Error156.ts`
-
-## Log Level Protocol
-
-| Level | AI Tag | Agent Action |
-|-------|--------|--------------|
-| INFO | `ai:INFO` | Record checkpoint |
-| WARN | `ai:WARN` | Trigger retry logic |
-| ERROR | `ai:ERROR` | Graph lookup for Type `E-{code}` |
-| FATAL | `ai:FATAL` | Escalate to human |
-
-## Error Code Ranges
-
-- E-100 to E-199: Authentication
-- E-200 to E-299: Network
-- E-300 to E-399: Database
-- E-400 to E-499: Validation
-
-## Language-Specific Implementation
+## Language-Specific Guidance
 
 Load the appropriate skill for your language:
 - **Go:** `skill("error-handling-go")`
 - **TypeScript/JavaScript:** `skill("error-handling-ts")`
 
-## Graph Queries for Error Analysis
-
-```cypher
-// Find error definition
-MATCH (e:Type {name: "Error156"}) RETURN e.file, e.line
-
-// Find usage sites
-MATCH (e:Type {name: "Error156"})<-[:INSTANTIATES]-(call:CallSite)
-RETURN call.file, call.line
-
-// Find error propagation
-MATCH (e:Type {name: "Error156"})<-[:THROWS]-(f1:Function)<-[:CALLS]-(f2:Function)
-RETURN f1.name as thrower, f2.name as caller
-```
+Load the language-specific skill when it applies. Use the dependencies, logger, and error conventions already present in the project; examples in a language skill are patterns to adapt, not a mandate to add a package or a new architecture.

@@ -9,7 +9,9 @@ This file is the host-facing SOP for entering canonical `vibe`. Keep it small: r
 
 ## Trigger Contract
 
-Enter canonical `vibe` before ordinary execution when the user explicitly invokes `$vibe`, `/vibe`, or the `vibe` skill, or when the host intentionally chooses governed requirement/plan/execution closure for a complex task.
+Enter canonical `vibe` only when the user explicitly invokes `$vibe`, `/vibe`, or this skill, or when an existing project/host policy explicitly requires the installed VCO workflow. Task complexity alone is not a trigger; do not route ordinary work to VCO by default.
+
+The VCO runtime must actually be installed and runnable. If it is missing or cannot launch, say so and do not claim canonical entry or fabricate runtime artifacts. Continue with the ordinary project workflow for the already-authorized task when that remains valid; if canonical VCO is itself a required acceptance gate, report that dependency as blocked and continue independent work.
 
 Do not route every loosely related task into `vibe`. Lightweight questions,
 single-command checks, or tasks better served by another explicitly requested
@@ -78,15 +80,17 @@ Only validate canonical proof artifacts after canonical-entry returns a `session
 It does not prove `runtime coherent` or `delivery accepted`.
 Proof of canonical launch is post-launch and requires: `host-launch-receipt.json`, `runtime-input-packet.json`, `governance-capsule.json`, and `stage-lineage.json` under the returned `session_root`.
 `local-agent-kernel` follows the same proof rule. If it cannot produce those truth artifacts, it may produce local work scaffolds, but it must not be treated as `canonical verified`.
-If canonical launch fails, report `blocked` with the concrete failure reason instead of simulating the missing stages or proof artifacts.
+If canonical launch fails, do not simulate missing stages or proof artifacts. Report the concrete failure; use the ordinary authorized workflow when VCO is optional for the requested outcome, or report the VCO-dependent portion blocked when it is a required gate.
 
 ## Consensus And Task Evolution
 
-Use `deep_interview` as a real conversation. Continue until the user and Agent
-share a concrete understanding of the goal, scope, constraints, deliverables,
-unknowns that affect the work, and completion criteria. A first clarification
-response is input to that conversation; freeze the requirement only when the
-user has confirmed the resulting task-specific summary.
+Use the request and available project evidence to capture the goal, scope,
+constraints, deliverables, and completion criteria. Ask a focused question only
+when a consequential unknown cannot be resolved from those sources. When the
+user selects canonical VCO, follow any approval or re-entry gate surfaced by its
+runtime even if the underlying work was already authorized. Do not add a second
+host approval prompt that merely repeats the runtime's gate or the user's
+authorization.
 
 Keep that agreement in the existing TaskCard. When the user changes the work,
 append an accepted revision, update the affected work units and checks, and
@@ -102,13 +106,17 @@ human judgment.
 2. `xl_plan`
 3. `phase_cleanup`
 
-When `bounded_return_control.explicit_user_reentry_required = true`, stop the
-current assistant turn. Do not consume re-entry credentials until a later user
-message approves or revises the current boundary.
+When canonical VCO is selected and
+`bounded_return_control.explicit_user_reentry_required = true`, stop the current
+assistant turn and wait for the specific user decision surfaced by the runtime.
+This surfaced gate applies even when the user has already authorized the task
+work. Do not add a second approval prompt merely to repeat the runtime's gate,
+and do not consume re-entry credentials before the required user response.
 
-This is a hard runtime boundary, not a suggestion. It overrides ordinary host
-autonomy rules such as "continue until done." A detailed original request is not
-approval of the frozen requirement or frozen plan. After a hard stop, do not
+This is a hard boundary when the opted-in runtime explicitly requires that
+decision. It does not make VCO the default workflow; outside an explicitly
+selected VCO run, do not create freeze or plan approval gates by default. After
+a hard stop, do not
 perform equivalent manual work outside governed re-entry: no plan writing, task
 execution, manual workaround delivery, or final artifact delivery in the same
 assistant turn.

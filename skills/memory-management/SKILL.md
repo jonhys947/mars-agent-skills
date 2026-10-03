@@ -7,37 +7,34 @@ description: Standards for managing project memory, preventing conflicts, and ma
 
 ## Purpose
 
-Maintain high-quality, conflict-free project memory that serves as the "living documentation" of project decisions, patterns, and constraints.
+Maintain useful, current project memory without turning it into a second or competing source of truth. Project memory is supporting context: follow the user's instructions and the project's authoritative specifications, policies, and contracts when sources disagree.
 
 ## Memory Structure
 
-```
-.opencode/memory/
+```text
+<project memory location, if the project defines one>/
   project.md      # Technical decisions, patterns, constraints
   human.md        # User preferences, communication style
   persona.md      # Agent personality and behavior
 ```
 
+This is an illustrative layout, not a required `.opencode` directory or file set. Use the memory location and format the project already supports. Do not create a parallel memory store when none is configured.
+
 ## Memory Audit Protocol
 
 ### When to Trigger Audit
 
-**Automatic triggers:**
-- Every 10 completed tasks
-- When `memory_read(block="project")` returns >500 lines
-- When conflicting rules are detected
-- Before major feature work begins
+Consider an audit when the user or project workflow requests one, when a relevant conflict or obsolete entry is found, or when a substantial project change makes existing memory suspect. Do not assume a task counter, memory API, or automatic audit hook is available.
 
 **Manual triggers:**
-- Tech Lead requests "Memory Audit"
-- Project Knowledge agent detects conflicts
-- After major refactoring or architecture changes
+- The user or the project's designated memory owner requests an audit.
+- A relevant conflict or major change makes existing memory suspect.
 
 ### Audit Process
 
-1. **Read Current Memory**
+1. **Read Available Memory**
    ```
-   memory_read(block="project")
+   [Use the project's configured memory mechanism, if available.]
    ```
 
 2. **Identify Issues**
@@ -53,18 +50,19 @@ Maintain high-quality, conflict-free project memory that serves as the "living d
    - UI/UX Patterns
    - Security Requirements
    - Performance Guidelines
-   - Testing Strategies
+   - Testing Strategy and Gates
    - Deployment Procedures
 
 4. **Resolve Conflicts**
    When rules conflict:
-   - Identify which is more recent
-   - Check which aligns with current codebase
-   - Flag for Tech Lead review if unclear
-   - Document resolution reasoning
+   - First check the applicable authority: user instructions and current project specifications, policies, or contracts take precedence over memory and implementation history.
+   - Within sources of equal authority, check scope, explicitness, and date. Recency alone does not override an authoritative requirement.
+   - Treat code as evidence of current behavior, not proof that the behavior is the intended contract.
+   - If an unresolved conflict changes the requested outcome, safety, or scope, surface it instead of silently choosing a side.
+   - Record the source and rationale when the project authorizes memory updates.
 
-5. **Archive Obsolete Content**
-   Move outdated patterns to `memory/archive/YYYY-MM-DD.md`
+5. **Handle Obsolete Content**
+   If the project has an archive convention and the update is authorized, preserve useful history there. Otherwise annotate or propose the change using the existing memory workflow; do not create an archive path or delete history by default.
 
 6. **Report Results**
    ```markdown
@@ -80,11 +78,7 @@ Maintain high-quality, conflict-free project memory that serves as the "living d
 ### When to Write
 
 **DO write when:**
-- Discovering a new project pattern
-- Making an architectural decision
-- Identifying a constraint or limitation
-- Learning from a mistake or bug
-- Establishing a new standard
+- A durable project decision, constraint, or learning needs to be recorded and the project workflow authorizes the update.
 
 **DON'T write when:**
 - Information is already documented
@@ -134,6 +128,8 @@ Maintain high-quality, conflict-free project memory that serves as the "living d
 
 ## Conflict Resolution
 
+Memory records decisions and context; it does not grant authority to override the user, current project policy, or a normative specification. When memory conflicts with a higher-authority source, follow that source and update or annotate the memory only when the task and project workflow authorize it.
+
 ### Detecting Conflicts
 
 **Common conflict patterns:**
@@ -144,10 +140,10 @@ Maintain high-quality, conflict-free project memory that serves as the "living d
 
 ### Resolution Strategy
 
-1. **Timestamp Check**: Prefer more recent guidance
-2. **Codebase Alignment**: Prefer what matches current code
-3. **Scope Check**: Ensure rules apply to same context
-4. **Tech Lead Review**: Escalate if unclear
+1. **Authority Check**: Identify which source governs the decision.
+2. **Scope Check**: Confirm the sources address the same project, version, and situation.
+3. **Same-Level Tie-Break**: Consider explicitness and date, while checking implementation as evidence rather than authority.
+4. **Escalate Material Ambiguity**: Ask the responsible person only when the unresolved conflict affects the outcome or risk.
 
 ### Conflict Documentation
 
@@ -158,24 +154,18 @@ When resolving conflicts, document the decision:
 
 **Conflict:** "Use Axios" vs "Use Fetch"
 
-**Analysis:**
-- Axios rule added: 2023-05-10
-- Fetch rule added: 2024-01-15
-- Current codebase: 80% Fetch, 20% Axios
+**Analysis:** One note predates the current API contract, while the other describes an older implementation pattern.
 
-**Decision:** Standardize on Fetch API
+**Decision:** Follow the current project contract for new work.
 
-**Action:** Archived Axios rule. New code uses Fetch.
-
-**Migration:** Existing Axios code can remain until refactored.
+**Action:** Mark the superseded memory entry with a reference to the governing contract if memory updates are authorized.
 ```
 
 ## Memory Garbage Collection
 
-### Triggers
-- Memory file exceeds 1000 lines
-- >20% of content is obsolete
-- Major version upgrade or refactoring
+### When to Review Size or Obsolescence
+- Memory has become difficult to find or keep current.
+- A major project change may have invalidated existing guidance.
 
 ### GC Process
 
@@ -185,8 +175,9 @@ When resolving conflicts, document the decision:
    - Superseded decisions
 
 2. **Archive with Context**
+   Use an archive only if the project defines one and the update is authorized; preserve useful context rather than silently deleting history.
    ```markdown
-   # memory/archive/2024-02-01.md
+   # Example: <project memory location>/archive/2024-02-01.md
    
    ## Archived: API Standards: REST Endpoints
    
@@ -257,7 +248,7 @@ When resolving conflicts, document the decision:
 ```
 
 ### Include Examples
-Every rule should have a code example showing correct usage.
+Use an example when it makes the decision or behavior clearer.
 
 ### Link to Code
 Reference actual files when possible:
@@ -272,41 +263,29 @@ See implementation in `src/auth/jwt.ts`
 
 ## Memory Size Management
 
-### Target Sizes
-- **project.md**: 300-800 lines (optimal)
-- **human.md**: 50-200 lines
-- **persona.md**: 100-300 lines
-
 ### When to Split
-If project.md exceeds 1000 lines, consider splitting:
+Split memory when distinct topics need different retrieval or ownership, or when the current structure is hard to navigate. Use the project's existing convention; for example:
 ```
-.opencode/memory/
+<project memory location>/
   project.md              # Core patterns
   project-api.md          # API-specific
   project-database.md     # Database-specific
   project-frontend.md     # Frontend-specific
 ```
 
-Update Project Knowledge agent to read all files.
+Update the applicable index or retrieval instructions when that is part of the authorized scope. Do not assume a specific memory agent exists.
 
 ## Integration with Agents
 
-**Project Knowledge**: Primary owner. Performs audits and GC.
-
-**Tech Lead**: Writes architectural decisions after major features.
-
-**All Engineers**: Can suggest memory entries via Tech Lead.
-
-**Product Owner**: Reads memory to understand constraints.
+Use the memory owners and approval flow that the project actually defines. Do not assume role names, tools, or write permission that are not present.
 
 ## Quick Reference
 
-| Action | Tool | When |
-|--------|------|------|
-| Read | `memory_read(block="project")` | Before any task |
-| Append | `memory_append(block="project", content="...")` | New pattern discovered |
-| Replace | `memory_replace(block="project", content="...")` | Audit/GC |
-| Audit | Manual trigger | Every 10 tasks |
+| Action | Guidance | When |
+|--------|----------|------|
+| Read | Use the configured memory source | When stored context is relevant and available |
+| Suggest/update | Use the project's authorized write path | When a durable decision or constraint needs recording |
+| Audit | Follow the project's memory workflow | When requested or when relevant entries may be stale or conflicting |
 
 ## Common Pitfalls
 

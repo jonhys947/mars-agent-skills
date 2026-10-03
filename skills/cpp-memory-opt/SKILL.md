@@ -1,29 +1,31 @@
 ---
 name: cpp-memory-opt
 description: "ESP32 heap/stack/buffer optimization for pool-controller firmware. Use when asked to reduce memory usage, fix heap fragmentation, eliminate String in loops, resize JSON buffers, or optimize RAM in the pool-controller C++ codebase. 🇩🇪 Deutsche Trigger: Speicheroptimierung, Heap-Fragmentierung beheben, String-Eliminierung, JSON-Puffer anpassen, RAM-Optimierung, Stack-Größe, statische Puffer."
-keywords:
-  - speicheroptimierung
-  - memory optimization
-  - heap fragmentierung
-  - heap fragmentation
-  - string elimination
-  - json puffer
-  - json buffer
-  - ram optimierung
-  - stack größe
-  - statische puffer
-  - static buffer
-  - arduinojson
-  - preferences nvs
+metadata:
+  keywords:
+    - speicheroptimierung
+    - memory optimization
+    - heap fragmentierung
+    - heap fragmentation
+    - string elimination
+    - json puffer
+    - json buffer
+    - ram optimierung
+    - stack größe
+    - statische puffer
+    - static buffer
+    - arduinojson
+    - preferences nvs
 ---
 
 # ESP32 Memory Optimization — Pool Controller
 
-Optimizing memory for the ESP32-based pool-controller firmware (PlatformIO, Arduino framework, C++17).
+This skill's file names, thresholds, and APIs refer only to the ESP32 pool-controller project using PlatformIO, Arduino, and C++17. Verify them in that project's current checkout before relying on them. For another target, use only the general measurement ideas and derive limits, buffer sizes, and allocation choices from that project's contracts, toolchain, and runtime data.
 
-> **🔍 Code Search**: Use `semble search "String concat in loop"` or
-> `semble search "StaticJsonDocument"` to find memory-heavy patterns. See `Agents.md`
-> §7 for full `semble` usage.
+> The original pool-controller workflow used `semble search "String concat in loop"`
+> and `semble search "StaticJsonDocument"`. Use those commands only if `semble`
+> is installed and configured for the target checkout; otherwise use the project's
+> available code-search tools. Its `Agents.md` reference is project-local.
 
 ## Key Constraints
 
@@ -64,18 +66,19 @@ snprintf(buffer, sizeof(buffer), "format %s %d", str, val);
 
 **Location**: `MqttPublisher.cpp`, `WebPortal.cpp`, `ConfigManager.cpp`
 
-Requirements (from `Agents.md` §21):
+Sizing guidance adapted for the pool-controller's JSON sites (confirm its current `Agents.md` policy and ArduinoJson version before applying):
 
 - Size `StaticJsonDocument` using the [ArduinoJson Assistant](https://arduinojson.org/v6/assistant/)
-- Serialization buffer must be **≥ 25% larger** than expected max JSON output
-- Never serialize `StaticJsonDocument<1024>` into `char buffer[512]` without truncation check
-- One-shot large documents (>1KB) → function-local, never `static` file-scope
+- Derive capacity from the maximum serialized output and the exact ArduinoJson version/API. Reserve the space the serializer requires and check its result or truncation status; there is no universal percentage margin.
+- Ensure the destination's actual capacity can hold the maximum output, including any required terminator; handle insufficient capacity explicitly.
+- Choose local, static, pooled, or heap storage from the measured stack/heap budgets, object lifetime, reuse, and concurrent call count. A byte threshold alone does not determine safe placement.
 
 **CHECK**: For each JSON serialization in the codebase, verify:
 
 ```
-maxJsonSize = measureJson(doc)  // ArduinoJson 7 returns size_t
-bufferSize  = maxJsonSize * 1.25 + 16  // ≥25% margin + safety
+requiredSize = serializer_size_for_this_version(doc)
+writtenSize  = serialize_using_the_project_api(doc, destination, capacity)
+verify writtenSize and the API's truncation/error result
 ```
 
 ### 3. Stack vs Heap Allocation
@@ -84,9 +87,9 @@ bufferSize  = maxJsonSize * 1.25 + 16  // ≥25% margin + safety
 - **File-scope `static`** = BSS/data segment (never freed) — use only for persistent state
 - **Heap (`new`/`malloc`)** = managed pool — fragment-prone
 
-**Rule from `Agents.md` §19**:
+### Storage selection
 
-> Large buffers (>512 B) used only once (e.g., setup path) must be function-local, not file-scope static.
+Choose storage from actual peak stack capacity, memory region, lifetime, reuse, and concurrency. A fixed size such as 512 bytes is not a general stack-versus-static rule. For this project, check its current `Agents.md` guidance before changing established placement.
 
 ### 4. Pin Configuration Validation
 

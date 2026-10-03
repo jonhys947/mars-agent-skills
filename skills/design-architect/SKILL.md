@@ -23,7 +23,7 @@ Place after Overview.
 ```
 
 ### Visual Diagrams
-Use **Mermaid** for diagrams.
+Use **Mermaid** when a diagram clarifies the design and the target renderer supports it. A diagram is optional when prose or a small table is clearer.
 - **Flowcharts**: Process flows.
 - **Sequence Diagrams**: Component interactions.
 - **Class Diagrams**: Data models.
@@ -39,7 +39,7 @@ Create a section for tools, libraries, and specs.
 ```markdown
 ## External References
 ### Tools and Libraries
-- **Actionlint**: [Link](...)
+- Include tools, libraries, standards, and sources that are relevant to the proposed design; do not add a generic tool list.
 ```
 
 ## Content Guidelines
@@ -59,8 +59,8 @@ For each component, define:
 
 ## Best Practices
 
-- **Context-First**: Before designing, Query `project-knowledge` to understand existing patterns.
-- **Contract-First**: The FIRST deliverable of any design must be the **Interface Definition** (e.g., `types.ts`, `interfaces.go`). This allows parallel work.
+- **Context-First**: Inspect the available source code, project documentation, conventions, and existing interfaces before proposing a design. Use a project-knowledge tool only if the environment provides one.
+- **Contract-First**: Describe the interface or contract in the design when it is relevant, including inputs, outputs, ownership, and failure behavior. A design task does not by itself authorize creating implementation files such as `types.ts` or `interfaces.go`; implement them only when implementation is in scope.
 - **Clarity**: Be precise about how the system works.
 - **Traceability**: Reference which requirements are satisfied by which design element.
 - **Completeness**: Cover error handling, validation, security, and performance.

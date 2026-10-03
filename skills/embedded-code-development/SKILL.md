@@ -1,74 +1,25 @@
 ---
 
 name: embedded-code-development
-kind: skill
-version: 1.0.0
-status: stable
-summary: Implement embedded and firmware changes with deterministic behavior, explicit
-  resource handling, hardware safety, and testable low-level code.
 description: Implement embedded and firmware changes with deterministic behavior,
   explicit resource handling, hardware safety, and testable low-level code. Use when
   the story targets firmware, device drivers, RTOS tasks, timing-sensitive logic,
   or hardware-facing integrations.
-model: sonnet
-model_profile: balanced-execution
-provider_models:
-  claude-code: sonnet
-  codex:
-    preferred: gpt-5.4
-    availability_safe_default: gpt-5.4
-  cursor:
-    preferred: Auto
-    recommended: Claude 4.6 Sonnet
-  vscode-copilot:
-    preferred: Auto
-    recommended: Claude Sonnet 4.6
-  openai-chatgpt:
-    preferred: Auto
-    recommended: GPT-5.3 Instant
-owner: implementation-engineer
-editors:
-- claude-code
-- codex
-- cursor
-- vscode-copilot
-tags:
-- embedded
-- firmware
-- rtos
-- safety
-- deterministic code
-requires:
-- approved US story
-- linked requirements and architecture
-optional_inputs:
-- hardware notes
-- timing constraints
-- memory constraints
-- coding guidelines
-produces:
-- implemented embedded code
-- embedded tests or harnesses
-- story decision log updates
-workflow_phase: execute-implementation
-review_mode: autonomous within approved story scope; escalate hardware-risk decisions
-activation_tier: extension
-extension_pack: device-mobile
 
 ---
 ## Purpose
 Implement embedded and firmware changes with deterministic behavior, explicit resource handling, hardware safety, and testable low-level code.
 
 ## Activation rule
-Follow `docs/guidelines/shared-operating-policy.md#extension-pack-activation-rule` — this skill belongs to the `device-mobile` extension pack.
+Use for authorized embedded implementation. Follow the target project's `AGENTS.md`, current contracts, toolchain, and hardware gates. The original bootstrap project's policy paths and story identifiers below apply only when that project actually supplies them. Model settings are configured by the runtime and user, not by this skill.
 
 ## Detailed workflow
-1. Read the story, linked requirements, architecture, timing/resource constraints, and any hardware guideline.
+1. Read the authorized task and existing requirements, architecture, timing/resource constraints, and hardware guidance. Use story artifacts only if the project maintains them.
 2. Identify the hardware-facing contract and the failure modes before changing code.
 3. Implement the smallest safe change with explicit state handling, bounded memory use, and clear error paths.
 4. Add or update unit tests, simulation tests, hardware-abstraction tests, or diagnostic hooks as the project allows.
-5. Add Doxygen-style or language-appropriate metadata comments to every new or changed function.
-6. Record the implementation decision in the story, especially for interrupt behavior, polling vs event-driven choices, retries, power modes, or watchdog interactions.
+5. Document non-obvious timing, ownership, hardware assumptions, and public contracts using the project's existing conventions; do not add boilerplate comments to every function.
+6. Update the project's relevant decision record when the authorized scope requires it, especially for interrupt behavior, polling vs event-driven choices, retries, power modes, or watchdog interactions.
 7. Run the implementation feedback loop and repair failures.
 
 ## Embedded best practices
@@ -96,17 +47,17 @@ Follow `docs/guidelines/shared-operating-policy.md#extension-pack-activation-rul
       return result;  // Propagate upward; do not continue.
   }
   ```
-- **Assertions for invariants:** Use `assert()` (or project-specific variants) for unrecoverable logic errors in development; disable in production if performance-critical.
+- **Assertions for invariants:** Follow the project's assertion and production fault policy. Removing diagnostics requires measured justification and must preserve required safety checks.
 - **Status/error enums:** Define clear error codes (e.g., `TIMEOUT`, `INVALID_STATE`, `HW_ERROR`) and document what each means and how to recover.
-- **Global error state:** In constrained systems, use a thread-safe global error registry or log; ISRs write to global, main loop reads asynchronously.
+- **ISR error reporting:** Use the project's verified ISR-safe queue, ring buffer, or handoff primitive for deferred reporting. Do not call a task logger or mutate a shared registry from an ISR without documented synchronization and bounded execution.
 - **C++ exceptions:** Use exceptions in exception-safe embedded C++ (rare); document exception guarantees (strong, basic, no-throw) for every function.
 - **Graceful degradation:** Identify which failures are recoverable (retry, reset peripheral) vs. fatal (halt, reboot, escalate to watchdog).
 
 ### Interrupt safety and concurrency
 - **Minimize ISR scope:** ISRs must be both short and bounded; complex logic belongs in tasklets or RTOS tasks.
-- **Atomic operations:** Use atomic operations (`stdatomic.h` C11, `std::atomic` C++11) for single-variable synchronization; avoid composite check-then-act.
+- **Atomic operations:** Use target-supported atomic operations or the project's verified critical-section primitives. C11 `stdatomic.h` and C++11 `std::atomic` apply only when the actual language/toolchain supports them and their implementation meets the ISR constraints; avoid composite check-then-act races.
 - **Critical sections:** Protect shared data with spinlocks, mutexes (if RTOS allows), or interrupt disabling; document lock nesting levels.
-- **Memory barriers:** Insert appropriate barriers (`volatile`, `atomic_thread_fence`) to prevent compiler/CPU reordering of I/O or shared memory.
+- **Memory barriers:** Use the platform's documented atomics and compiler/CPU barriers where required. `volatile` alone provides neither a memory barrier nor inter-context synchronization.
 - **Deadlock prevention:** Use timeout-based locks or non-blocking alternatives; never call blocking functions from ISRs.
 - **Race condition testing:** Use stress tests, thread sanitizers (where applicable), and Helgrind (Valgrind) to expose race conditions in simulation.
 
@@ -120,16 +71,16 @@ Follow `docs/guidelines/shared-operating-policy.md#extension-pack-activation-rul
 ## Completion checklist
 Use this checklist before marking embedded implementation work complete:
 - [ ] **Story linked requirements and architecture reviewed** (understand the hardware contract and constraints).
-- [ ] **All new/changed functions have metadata comments** (purpose, inputs, outputs, side effects, pre/post conditions).
+- [ ] **Non-obvious assumptions and public contracts documented** using the project's conventions.
 - [ ] **Every error path is handled explicitly** (no silent failures; all error codes checked).
-- [ ] **All timeouts are bounded and documented** (no infinite loops or deadlocks; timeout rationale in story decision log).
+- [ ] **All timeouts are bounded and documented** (no infinite loops or deadlocks; rationale in the existing authorized project record where applicable).
 - [ ] **Interrupt handlers are minimal and bounded** (heavy work deferred to task/main context).
-- [ ] **Shared data is protected** (atomic ops, locks, or volatile; critical sections documented).
+- [ ] **Shared data is protected** with documented platform synchronization; `volatile` alone is insufficient.
 - [ ] **Resources are explicitly cleaned up** (no leaks of memory, file handles, DMA, or interrupts).
 - [ ] **Hardware assumptions are documented** (timing, concurrency, register state, shared bus expectations).
 - [ ] **Unit tests pass** (function-level tests in simulation with mocked hardware).
-- [ ] **Integration or hardware-in-the-loop tests pass** (behavior on real or simulated hardware).
-- [ ] **Story decision log updated** (rationale for polling vs. event-driven, interrupt choices, error escalation, timing thresholds).
+- [ ] **Applicable authorized integration checks recorded**; physical/HIL checks not performed remain explicitly pending, not implicitly passed.
+- [ ] **Existing authorized project decision record updated where applicable**; mark not applicable when the project has no such record.
 - [ ] **Code review checklist passed** (syntax and pattern review by another engineer).
 - [ ] **Power and timing targets met or explicitly deferred** (profiling data attached if available).
 
@@ -139,12 +90,16 @@ Use this checklist before marking embedded implementation work complete:
 - Check `docs/guidelines/small-change-fast-path.md` if the embedded change is isolated, low-risk, and doesn't affect hardware contracts.
 
 ## Story and artifact maintenance
+
+Apply this section only when the project uses these artifact types. Update existing records within the authorized scope; do not create a parallel story or architecture system.
 - Keep `US-*`, `HUS-*`, `BUG-*`, and `FEAT-*` items updated with implementation decisions (especially for interrupt behavior, polling cadence, retry logic, watchdog escalation).
 - Link the story to tests: `TEST-*` for unit tests, `HIL-*` for hardware-in-the-loop, `PERF-*` for timing/power benchmarks.
 - Update architecture records (ADR) if the embedded implementation changes hardware contracts or RTOS assumptions.
 - Record any deferred work (e.g., "power profiling deferred to Phase 3") in the story so follow-up items don't get lost.
 
 ## Commands
+
+These are illustrative commands for their named toolchains, not an instruction to introduce tools or flash hardware. Use actual project targets and authorized validation. Unexecuted physical checks remain pending; for Gauge record `NÃO EXECUTADO — GATE FÍSICO`. Sample polling periods, retry counts, watchdog policy, pin mappings, and synchronization below are not normative defaults.
 
 ### Compile and run unit tests (FreeRTOS + CMake example):
 ```bash
@@ -191,7 +146,7 @@ python3 scripts/analyze_hil_results.py results.csv
 ```
 
 ## Function metadata standard
-Follow `docs/guidelines/shared-operating-policy.md#function-metadata-standard` — use Doxygen for C/C++ and `///` doc-comments for Rust. Include `@pre`/`@post`, `@relates`, and safety notes for embedded context.
+Follow the project's documentation conventions. If its bootstrap policy defines `docs/guidelines/shared-operating-policy.md#function-metadata-standard`, use it; otherwise the formats below are optional examples. Document meaningful preconditions, side effects, and safety assumptions without inventing story IDs or requiring boilerplate.
 
 Example (C — Doxygen, blocking SPI read):
 ```c
@@ -256,16 +211,21 @@ pub async fn sensor_sample_read(ctx: &mut SensorCtx) -> Result<SensorSample, Sen
 ```c
 static volatile bool sensor_data_ready = false;
 
+// Illustrative flag only: volatile is not synchronization and a bool can lose
+// repeated events. Replace with the target's verified ISR-safe handoff when
+// consuming from another context or when every event must be retained.
+
 /**
  * @brief SPI data-ready interrupt handler.
  * 
- * Minimal work: flag a data-ready event and arm the completion ISR.
- * Heavy work (error handling, state transition) deferred to task context.
+ * Illustrative event publication only; no completion ISR is armed here.
+ * The synchronous polling example below does not consume this flag.
+ * An event-driven implementation needs its own verified handoff and consumer.
  */
 void spi_irq_handler(void) {
     sensor_data_ready = true;
     // Do NOT call sensor_read_register() here—it can block.
-    // Do NOT call xTaskNotifyFromISR() multiple times; use semaphore or flag.
+    // Use the project's ISR-safe notification/queue and documented yield policy.
 }
 ```
 
@@ -319,10 +279,11 @@ void sensor_polling_task(void *arg) {
                 if (consecutive_errors >= MAX_ERRORS_BEFORE_WATCHDOG) {
                     // Unrecoverable; escalate to watchdog.
                     log_error("Sensor: %d consecutive errors. Triggering watchdog.", consecutive_errors);
-                    while (1) {
-                        // Halt here; watchdog will reset the device.
-                        // Alternatively: invoke a recovery handler (reboot, safe mode).
-                    }
+                    // Delegate safe outputs, task supervision, and reset policy
+                    // to the project's established recovery flow. This helper
+                    // is a placeholder, not a provided runtime implementation.
+                    project_sensor_failure_recovery(ctx);
+                    return;
                 } else {
                     // Retry after exponential backoff (e.g., 100ms * 2^attempt, capped).
                     uint32_t backoff_ms = (1u << (consecutive_errors - 1)) * 100;
@@ -349,7 +310,7 @@ void sensor_polling_task(void *arg) {
 - **Error escalation:** 5 consecutive read failures triggers watchdog reset (unrecoverable hardware state).
 - **Exponential backoff:** After first failure, wait 100ms; after second, 200ms, etc., capped at 500ms.
 - **Why not polling:** Considered event-driven approach (interrupt on sensor ready); deferred due to sensor datasheet latency (up to 50ms jitter), making polling simpler.
-- **Why watchdog:** Hardware watchdog chosen over software reboot to guarantee reset even if CPU is hung.
+- **Watchdog assumption:** A reset is guaranteed only if the actual watchdog is configured and its feeding/supervision policy stops feeding for this failure. Verify that policy; do not infer reset from a stalled task.
 - **Future improvements:** Implement sensor health diagnostics (self-test register) before escalating to watchdog.
 
 Linked artifacts:
@@ -370,7 +331,7 @@ Linked artifacts:
 
 ## Code review checklist for embedded changes
 Before committing embedded code:
-- [ ] **All new functions have metadata comments** (purpose, inputs, outputs, side effects, pre/post conditions, linked reqs/tests).
+- [ ] **Relevant function contracts and non-obvious assumptions documented** with existing project conventions.
 - [ ] **No dynamic allocation in ISRs or safety-critical paths** (or justified + profiled).
 - [ ] **All error codes are checked** before proceeding (no implicit success).
 - [ ] **Timeouts are bounded** (no infinite loops; all blocking ops have timeout).
@@ -380,7 +341,7 @@ Before committing embedded code:
 - [ ] **Hardware assumptions are documented** (e.g., "SPI bus is not shared with other tasks").
 - [ ] **Tests are present** (unit tests, simulation tests, or hardware-in-the-loop).
 - [ ] **Power/timing constraints are met or waived** (document if performance/power profiling deferred).
-- [ ] **Story decision log is updated** (rationale for polling cadence, interrupt choices, escalation strategy, etc.).
+- [ ] **Existing authorized project decision record updated where applicable**; do not introduce a parallel story system.
 
 ## Testing embedded code
 ### Unit tests (simulation environment)

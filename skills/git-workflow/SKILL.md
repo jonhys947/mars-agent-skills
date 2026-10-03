@@ -7,7 +7,7 @@ description: Standardized Git workflows, commit conventions, and release process
 
 ## Commit Message Convention
 
-All commits MUST follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
+Follow the repository's commit convention. If it uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), use that format; do not impose a new convention on a project that has another one.
 
 ### Format
 
@@ -39,23 +39,20 @@ Indicate breaking changes with `!` after type/scope or `BREAKING CHANGE:` in foo
 
 ## Pre-commit Hooks
 
-Ensure pre-commit hooks are respected (usually defined in `.pre-commit-config.yaml`).
-- **Commit Message Validation**: Enforces conventional commit format
-- **Secret Detection**: Checks for credentials
-- **Linting**: Shellcheck, Actionlint, etc.
+Follow hooks that the repository actually configures, such as checks in `.pre-commit-config.yaml`. Treat Conventional Commit validation, secret scanning, and linting as examples only when those hooks are present.
 
 ## Pull Request Standards
 
 ### Guidelines
 
 - Keep PRs short and concise.
-- Link to relevant tickets (JIRA/Issues).
+- Link to relevant tickets when the project uses them and a related ticket exists.
 - Focus on what changed and why.
 - Include risk assessment for significant changes.
 
 ### PR Title Format
 
-Use conventional commit format:
+If the repository uses Conventional Commit titles, use that format. Otherwise follow its established PR title convention. For example:
 ```
 feat(go-test): add coverage threshold support
 fix(terraform-plan): handle workspace selection correctly
@@ -63,8 +60,10 @@ fix(terraform-plan): handle workspace selection correctly
 
 ## Branching Strategy
 
+Follow the user's instruction and the repository's established workflow. Do not create or switch branches as a routine step when the authorized task is to work in the current checkout.
+
 ### Branch Naming
-Use descriptive names with ticket references:
+If a new branch is requested or required by the project workflow, use its naming convention. For example:
 ```
 feature/JIRA-123-add-oauth-support
 bugfix/JIRA-456-fix-null-pointer
@@ -74,14 +73,14 @@ release/v2.1.0
 
 ## Release Management
 
-### Worktree & Checkpoint Protocol
+### Commits, Worktrees, and Checkpoints
 
-*   **Micro-Commits:** Commit after *every* successful logical step (e.g., "created type", "passed test"). This acts as a "Save Point" for the agent.
-*   **Worktree Hygiene:** NEVER push the worktree directory structure itself. Only push the *contents* (commits) of the branch.
-*   **Abandonment:** If a worktree is abandoned (rollback), ensure `git worktree remove` is called to keep the filesystem clean.
+- A reviewable diff is the default checkpoint. Commit only when the user or applicable project workflow authorizes it; group changes into coherent commits rather than committing every small step.
+- Use a worktree only when requested or required by the established workflow. Do not remove a worktree or discard its state as automatic cleanup; first preserve any uncommitted work and follow the applicable authorization.
+- When pushing an authorized branch, push the branch contents using the repository's normal remote workflow. Never treat worktree metadata or local paths as publishable content.
 
 ### Semantic Versioning
-Follow [Semantic Versioning 2.0.0](https://semver.org/): `MAJOR.MINOR.PATCH`.
+Use [Semantic Versioning](https://semver.org/) when the project follows it; otherwise use the project's versioning policy.
 
 ## Best Practices
 
@@ -92,8 +91,6 @@ Follow [Semantic Versioning 2.0.0](https://semver.org/): `MAJOR.MINOR.PATCH`.
 4. Write clear commit message
 5. Verify no secrets included
 
-### Before Creating PR
-1. Rebase on latest `main`
-2. Squash commits if needed
-3. Run full test suite locally
-4. Verify CI checks pass
+### Before Creating a PR
+
+Confirm the intended base and project CI, and run the checks that apply to the change. These are not automatic Git actions: do not fetch, rebase, squash, push, create or update a PR, or merge unless that specific action is authorized. Do not rewrite shared history. A review request alone does not authorize publishing a review or merging.
