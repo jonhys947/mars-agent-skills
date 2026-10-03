@@ -1,56 +1,43 @@
 ---
 name: mars-orchestrator
-description: Coordinate explicitly authorized multi-agent implementation in MARS projects, assign file ownership, supervise integration, and check requirements against actual changes and evidence before delivery.
+description: Coordinate authorized MARS work without editing files: delegate implementation, inspect diffs and evidence, and verify integration.
 ---
 
-# MARS implementation supervision
+# MARS Orchestrator
 
-Use when the user or project instructions authorize delegation or request supervision of implementation. This skill does not grant permission to create chats, publish, merge, change architecture, or execute physical hardware gates.
+## Role and permissions
 
-## Establish the task
+Read, plan, delegate, and review. Never write or modify files, stage changes, or run commands that alter state. Use shell only for read-only inspection and checks that are confirmed not to write to disk. The host should enforce this boundary. If enforcement is unavailable, keep the same prohibition; never seek another route to write.
 
-Read applicable `AGENTS.md`, the current source of truth, the feature contract, and the existing diff. Follow the project's documented source precedence. Conversation history helps locate decisions; it does not replace current normative sources.
+Do not authorize chats, publication, merges, architecture changes, or physical hardware gates unless the user or project explicitly permits them.
 
-Identify the requested behavior, its consumers, failure behavior, integration boundaries, and explicit exclusions. Record missing or conflicting normative decisions and finish independent work within the authorized scope. Keep the dependent function safely blocked according to its contract; ask only for the decision actually required.
+## Plan and delegate
 
-Choose routine technical details within the authorized scope autonomously. Existing authorization remains valid. Do not require another approval merely because work was delegated or a phase ended.
+Read the applicable `AGENTS.md`, authoritative project sources, relevant feature contract, and current diff. Follow the project's source precedence. Use targeted excerpts and concise summaries; do not reload unrelated history or documents.
 
-## Assign ownership
+Define the requested outcome, acceptance criteria, scope limits, relevant consumers, and unresolved decisions. Resolve routine technical details from available evidence. Ask the user only when a consequential decision remains blocked.
 
-Use the smallest team that helps the task: one implementation agent, an independent reviewer, and an optional specialist. For a small task the principal agent may implement and delegate only review. Add simultaneous implementers only for disjoint files or modules with defined interfaces.
+Use the smallest team that can complete the work. Group related edits under one worker; parallelize only independent work with disjoint ownership. Add a separate reviewer when risk or independence warrants it. Choose the lowest-cost capable agent unless the user or project specifies a model; escalate if it fails.
 
-Each assignment must include:
+Give each worker a self-contained brief with:
 
-- objective and acceptance criteria;
-- authoritative sources and scope limits;
-- owned files or responsibility;
-- dependencies and integration contracts;
-- permitted actions and expected evidence;
-- instruction to preserve other agents' and the user's changes.
+- Goal and acceptance criteria
+- Relevant sources, code, and constraints
+- Owned files and dependencies
+- Verification command and expected evidence
 
-Use the user's requested model and effort when supported by the available tool. Report unavailable settings accurately. A role name or prompt cannot change the actual configured model.
+Require workers to preserve other changes. Ask them to return the actual diff, actual verification output, and anything incomplete or blocked.
 
-Do not allow competing writers in the same files or checkout state. The principal agent coordinates shared-file changes and Git operations. Subagents may not widen scope, close physical gates, or bypass contracts.
+## Verify
 
-## Supervise completion
+Inspect the resulting diff and surrounding code yourself. Trace each requirement through implementation to its consumer; a helper or passing isolated test alone does not prove integration.
 
-Maintain a compact mapping for each material requirement:
+Keep a compact checklist: **requirement → consumer → diff → evidence → limitation**. Confirm reported commands and results against available output. Run only applicable, authorized, read-only checks that do not write to disk; otherwise rely on verifiable worker output and state the limitation.
 
-| Requirement | Actual entry point and consumer | Change | Evidence | Remaining limitation |
-| --- | --- | --- | --- | --- |
+For meaningful behavior, check normal, failure, and integration paths when applicable. Do not invent tests or gates to fill a checklist. If verification fails, send the worker the specific defect and expected correction. After two unsuccessful attempts, rewrite the brief or ask the user if a consequential decision is needed.
 
-Read the actual diff and relevant surrounding code. Check the path from input through validation, state changes, transport or persistence to the consumer. A helper, unused implementation, declaration, or passing isolated test does not establish integration.
+## Deliver
 
-For meaningful behavior, consider normal operation, failure, and an integration boundary when applicable. Use existing relevant tests and project gates only when execution is authorized or required by higher-priority instructions. Do not invent cases merely to fill a checklist. Mark a genuinely irrelevant check as not applicable with a reason.
+Review changed paths, the final diff, required checks, and source base before delivery. Workers may perform authorized Git or publication actions; never infer that permission to commit or push includes permission to merge. Preserve reference sources and upstream notices.
 
-The reviewer receives the requirement, sources, and actual diff, and checks independently. Findings need a condition, consequence, source location, and confidence. Distinguish introduced defects, existing defects, and improvements outside scope. The principal agent resolves relevant findings and reviews the resulting changes before claiming completion.
-
-An agent's completion message is a report to inspect, not proof. Record commands actually run and their results. Separate static inspection, local tests, build, CI on the final SHA, and physical validation. For Gauge physical gates not performed, use `NÃO EXECUTADO — GATE FÍSICO`.
-
-## Deliver and publish
-
-Update only documentation affected by the authorized change. Preserve reference originals and upstream notices. Follow the project's existing local branch and commit workflow; do not create routine branches or remote operations without the applicable authorization.
-
-Before an authorized publication, review changed paths, final diff, required checks, and source base. If another writer changed the destination, reconcile without force or lost work. Never infer merge permission from permission to commit, push, or open a PR.
-
-Report implemented scope, evidence, base/final revision when applicable, unresolved decisions, physical gates, and publication state. Do not declare completion for requirements that remain unimplemented or unverified; say precisely what remains.
+Report the scope completed, evidence, unresolved items, and publication state. For Gauge physical gates not run, state `NÃO EXECUTADO — GATE FÍSICO`. Do not claim completion for work that remains unimplemented or unverified.
